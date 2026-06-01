@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+!.env.example
+coverage/
+storage/uploads/
+storage/thumbnails/
+storage/temp/
+storage/backups/
+storage/logs/
+*.log
+Thumbs.db
+.DS_Store

@@ -1,0 +1,28 @@
+{
+  "name": "postmerce",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.3.0",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w @postmerce/app",
+    "dev:app": "npm run dev -w @postmerce/app",
+    "dev:marketing": "npm run dev -w @postmerce/marketing",
+    "build": "npm run build -w @postmerce/app && npm run build -w @postmerce/marketing",
+    "typecheck": "npm run typecheck -w @postmerce/app && npm run typecheck -w @postmerce/marketing",
+    "lint": "eslint .",
+    "check": "npm run typecheck && npm run lint",
+    "migrate": "npm run migrate -w @postmerce/app",
+    "worker": "npm run worker -w @postmerce/app"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@types/node": "^22.15.29",
+    "eslint": "^9.28.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1"
+  }
+}
