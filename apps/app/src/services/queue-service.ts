@@ -1,4 +1,5 @@
 import { env } from "../config/env.js";
+import { getConnectedSocialAccount, getSocialAccountById } from "../db/account-repository.js";
 import {
   cancelPublishJob,
   claimNextPublishJob,
@@ -24,6 +25,7 @@ import type {
 } from "../domain.js";
 import { DryRunPublisher } from "../platforms/dry-run-publisher.js";
 import type { PlatformPublisher } from "../platforms/platform-publisher.js";
+import { YouTubePublisher } from "../platforms/youtube-publisher.js";
 import { logger } from "./logger.js";
 import { classifyError, getRetryDecision } from "./retry.js";
 
@@ -40,19 +42,49 @@ export interface ProcessPublishJobResult {
 }
 
 const dryRunPublisher = new DryRunPublisher();
+const youtubePublisher = new YouTubePublisher();
 
-function getPublisher(_platform: Platform): PlatformPublisher | null {
-  return env.dryRun ? dryRunPublisher : null;
+function getPublisher(platform: Platform): PlatformPublisher | null {
+  if (env.dryRun) {
+    return dryRunPublisher;
+  }
+
+  if (platform === "youtube") {
+    return youtubePublisher;
+  }
+
+  return null;
 }
 
 function dryRunAccount(context: PublishJobContext): SocialAccountRecord {
   return {
     id: context.target.socialAccountId ?? 0,
     platform: context.target.platform,
+    platformUserId: "dry_run",
     displayName: "Dry Run Account",
     username: "dry_run",
-    status: "connected"
+    avatarUrl: null,
+    accountType: "test",
+    status: "connected",
+    metadata: {
+      mode: "dry_run"
+    },
+    createdAt: new Date(),
+    updatedAt: new Date()
   };
+}
+
+async function getPublishAccount(context: PublishJobContext): Promise<SocialAccountRecord | null> {
+  if (env.dryRun) {
+    return dryRunAccount(context);
+  }
+
+  if (context.target.socialAccountId !== null) {
+    const account = await getSocialAccountById(context.target.socialAccountId);
+    return account?.status === "connected" ? account : null;
+  }
+
+  return getConnectedSocialAccount(context.target.platform);
 }
 
 async function recordFailure(
@@ -169,8 +201,26 @@ export async function processNextPublishJob(workerId: string): Promise<ProcessPu
     }
 
     const validation = await publisher.validate(context.target, context.media);
+    const account = await getPublishAccount(context);
+
+    if (!account) {
+      await recordFailure(
+        context,
+        "auth_account_missing",
+        `No connected ${context.target.platform} account is available for publishing.`,
+        false
+      );
+
+      return {
+        processed: true,
+        jobId: context.job.id,
+        status: "failed",
+        message: "Publishing account missing."
+      };
+    }
+
     const publishResult = validation.ok
-      ? await publisher.publish(context.target, context.media, dryRunAccount(context))
+      ? await publisher.publish(context.target, context.media, account)
       : failedValidationResult(validation.errors);
 
     if (publishResult.ok) {

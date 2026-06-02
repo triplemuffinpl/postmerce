@@ -1,4 +1,4 @@
-import type { PlatformConfig } from "../../domain.js";
+import type { PlatformConfig, SocialAccountRecord } from "../../domain.js";
 import { escapeHtml } from "../html.js";
 
 // Beautiful brand inline SVGs
@@ -20,12 +20,63 @@ const platformIcons: Record<string, string> = {
           </svg>`
 };
 
-export function platformList(platforms: PlatformConfig[]): string {
+interface PlatformListOptions {
+  platforms: PlatformConfig[];
+  accounts: SocialAccountRecord[];
+  youtubeOAuthConfigured: boolean;
+  showConnectionDetails?: boolean;
+}
+
+function accountSummary(accounts: SocialAccountRecord[]): string {
+  if (accounts.length === 0) {
+    return "Brak polaczonego konta";
+  }
+
+  return accounts
+    .map((account) => account.displayName ?? account.username ?? account.platformUserId ?? `Konto #${account.id}`)
+    .map(escapeHtml)
+    .join(", ");
+}
+
+function platformAction(
+  platform: PlatformConfig,
+  accounts: SocialAccountRecord[],
+  youtubeOAuthConfigured: boolean,
+  showConnectionDetails: boolean
+): string {
+  if (!showConnectionDetails) {
+    return "";
+  }
+
+  if (!platform.enabled) {
+    return `<span class="status-badge status-muted">Wylaczona</span>`;
+  }
+
+  if (platform.platform !== "youtube") {
+    return `<span class="status-badge status-muted">W kolejce</span>`;
+  }
+
+  if (!youtubeOAuthConfigured) {
+    return `<span class="status-badge status-danger">Brak OAuth</span>`;
+  }
+
+  if (accounts.length > 0) {
+    return `<a class="inline-action" href="/accounts/youtube/connect">Odswiez dostep</a>`;
+  }
+
+  return `<a class="inline-action" href="/accounts/youtube/connect">Polacz YouTube</a>`;
+}
+
+export function platformList(options: PlatformListOptions): string {
+  const showConnectionDetails = options.showConnectionDetails ?? true;
+
   return `
     <div class="platform-list">
-      ${platforms
+      ${options.platforms
         .map((platform) => {
-          const status = platform.enabled ? "Aktywna" : "Wyłączona";
+          const accounts = options.accounts.filter((account) => account.platform === platform.platform);
+          const connectedAccounts = accounts.filter((account) => account.status === "connected");
+          const status = connectedAccounts.length > 0 ? "Polaczona" : platform.enabled ? "Aktywna" : "Wylaczona";
           const statusClass = platform.enabled ? "status-ok" : "status-muted";
           const icon = platformIcons[platform.platform] || "";
           return `
@@ -37,11 +88,19 @@ export function platformList(platforms: PlatformConfig[]): string {
                 <div>
                   <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700;">${escapeHtml(platform.label)}</h3>
                   <p style="margin: 0; font-size: 0.85rem; color: var(--muted); font-weight: 500;">
-                    ${platform.directPublishing ? "Planowane bezpośrednie publikowanie API" : "Planowany przepływ kontenera / odpytywania"}
+                    ${platform.directPublishing ? "Bezposrednie publikowanie API" : "Planowany przeplyw kontenera / odpytywania"}
                   </p>
+                  ${
+                    showConnectionDetails
+                      ? `<p style="margin-top: 4px; font-size: 0.78rem; color: var(--muted); font-weight: 600;">${accountSummary(connectedAccounts)}</p>`
+                      : ""
+                  }
                 </div>
               </div>
-              <span class="status-badge ${statusClass}">${status}</span>
+              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+                <span class="status-badge ${connectedAccounts.length > 0 ? "status-ok" : statusClass}">${status}</span>
+                ${platformAction(platform, connectedAccounts, options.youtubeOAuthConfigured, showConnectionDetails)}
+              </div>
             </article>
           `;
         })

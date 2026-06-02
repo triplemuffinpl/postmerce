@@ -33,7 +33,13 @@ function emptyToNull(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
-function buildTargets(form: FormRecord, scheduledAt: Date | null, targetStatus: CreatePostTargetInput["status"]): CreatePostTargetInput[] {
+function buildTargets(
+  form: FormRecord,
+  scheduledAt: Date | null,
+  targetStatus: CreatePostTargetInput["status"],
+  baseTitle: string,
+  baseHashtags: string | null
+): CreatePostTargetInput[] {
   const enabledPlatforms = new Set(formValues(form, "platforms"));
 
   return getPlatformConfigs()
@@ -45,9 +51,9 @@ function buildTargets(form: FormRecord, scheduledAt: Date | null, targetStatus: 
 
       return {
         platform,
-        platformTitle: emptyToNull(formValue(form, `${platform}_title`)),
+        platformTitle: emptyToNull(formValue(form, `${platform}_title`)) ?? baseTitle,
         platformCaption: caption,
-        platformHashtags: emptyToNull(formValue(form, `${platform}_hashtags`)),
+        platformHashtags: emptyToNull(formValue(form, `${platform}_hashtags`)) ?? baseHashtags,
         platformOptions: {
           privacy: formValue(form, `${platform}_privacy`) || "default"
         },
@@ -78,7 +84,7 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
   const scheduledAt = optionalDateTimeLocal(formValue(form, "scheduled_at"));
   const postStatus: CreatePostInput["status"] = shouldQueue ? "queued" : "draft";
   const targetStatus: CreatePostTargetInput["status"] = shouldQueue ? "queued" : "draft";
-  const targets = buildTargets(form, scheduledAt, targetStatus);
+  const targets = buildTargets(form, scheduledAt, targetStatus, title, baseHashtags);
 
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) {
     errors.push("Choose a ready media asset.");

@@ -68,7 +68,12 @@ export function dashboardPage(options: DashboardPageOptions): string {
           </div>
           <a class="text-link" style="font-weight: 700;" href="/accounts">Zarządzaj kontami</a>
         </div>
-        ${platformList(options.platforms)}
+        ${platformList({
+          platforms: options.platforms,
+          accounts: [],
+          youtubeOAuthConfigured: false,
+          showConnectionDetails: false
+        })}
       </section>
     `
   });

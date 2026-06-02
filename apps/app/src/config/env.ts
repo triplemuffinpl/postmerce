@@ -46,6 +46,10 @@ const envSchema = z.object({
   ENABLE_INSTAGRAM: booleanFromEnv.default("false"),
   ENABLE_FACEBOOK: booleanFromEnv.default("false"),
   ENABLE_TIKTOK: booleanFromEnv.default("false"),
+  YOUTUBE_CLIENT_ID: z.string().default(""),
+  YOUTUBE_CLIENT_SECRET: z.string().default(""),
+  YOUTUBE_REDIRECT_URI: z.string().default(""),
+  YOUTUBE_UPLOAD_CATEGORY_ID: z.string().default("22"),
   WORKER_POLL_MS: z.coerce.number().int().positive().default(5000),
   WORKER_LOCK_SECONDS: z.coerce.number().int().positive().default(300),
   WORKER_BATCH_SIZE: z.coerce.number().int().positive().default(5)
@@ -77,6 +81,13 @@ export const env = {
     instagram: parsed.ENABLE_INSTAGRAM,
     facebook: parsed.ENABLE_FACEBOOK,
     tiktok: parsed.ENABLE_TIKTOK
+  },
+  youtubeOAuth: {
+    clientId: parsed.YOUTUBE_CLIENT_ID,
+    clientSecret: parsed.YOUTUBE_CLIENT_SECRET,
+    redirectUri: parsed.YOUTUBE_REDIRECT_URI || `${parsed.APP_URL}/oauth/youtube/callback`,
+    uploadCategoryId: parsed.YOUTUBE_UPLOAD_CATEGORY_ID,
+    configured: Boolean(parsed.YOUTUBE_CLIENT_ID && parsed.YOUTUBE_CLIENT_SECRET)
   },
   workerPollMs: parsed.WORKER_POLL_MS,
   workerLockSeconds: parsed.WORKER_LOCK_SECONDS,

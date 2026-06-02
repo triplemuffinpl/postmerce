@@ -84,10 +84,12 @@ export interface AccountInfoResult {
 
 export interface PostTargetDraft {
   id: number;
+  socialAccountId: number | null;
   platform: Platform;
   platformTitle: string | null;
   platformCaption: string;
   platformHashtags: string | null;
+  platformOptions: Record<string, unknown>;
   status: PostTargetStatus;
 }
 
@@ -115,9 +117,28 @@ export interface MediaAssetRecord {
 export interface SocialAccountRecord {
   id: number;
   platform: Platform;
+  platformUserId: string | null;
   displayName: string | null;
   username: string | null;
+  avatarUrl: string | null;
+  accountType: string | null;
   status: SocialAccountStatus;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface OAuthTokenRecord {
+  id: number;
+  socialAccountId: number;
+  accessTokenEncrypted: string;
+  refreshTokenEncrypted: string | null;
+  expiresAt: Date | null;
+  scopes: string[];
+  tokenType: string | null;
+  metadata: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface PostRecord {
