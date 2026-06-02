@@ -20,6 +20,7 @@ export interface NewPostFormData {
 export interface CreatePostResult {
   ok: boolean;
   post: PostRecord | null;
+  enqueuedJobCount: number;
   errors: string[];
 }
 
@@ -73,9 +74,10 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
   const baseCaption = formValue(form, "base_caption").trim();
   const baseHashtags = emptyToNull(formValue(form, "base_hashtags"));
   const action = formValue(form, "action");
+  const shouldQueue = action === "schedule";
   const scheduledAt = optionalDateTimeLocal(formValue(form, "scheduled_at"));
-  const postStatus: CreatePostInput["status"] = action === "schedule" ? "scheduled" : "draft";
-  const targetStatus: CreatePostTargetInput["status"] = action === "schedule" ? "scheduled" : "draft";
+  const postStatus: CreatePostInput["status"] = shouldQueue ? "queued" : "draft";
+  const targetStatus: CreatePostTargetInput["status"] = shouldQueue ? "queued" : "draft";
   const targets = buildTargets(form, scheduledAt, targetStatus);
 
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) {
@@ -90,31 +92,30 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
     errors.push("Choose at least one enabled platform target.");
   }
 
-  if (action === "schedule" && scheduledAt === null) {
-    errors.push("Scheduled date is required when scheduling.");
-  }
-
   if (errors.length > 0) {
     return {
       ok: false,
       post: null,
+      enqueuedJobCount: 0,
       errors
     };
   }
 
-  const post = await createPostWithTargets({
+  const result = await createPostWithTargets({
     mediaAssetId,
     title,
     baseCaption,
     baseHashtags,
     status: postStatus,
     scheduledAt,
-    targets
+    targets,
+    enqueueJobs: shouldQueue
   });
 
   return {
     ok: true,
-    post,
+    post: result.post,
+    enqueuedJobCount: result.enqueuedJobCount,
     errors: []
   };
 }

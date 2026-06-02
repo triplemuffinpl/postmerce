@@ -19,6 +19,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: postmerce-app
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
@@ -47,3 +48,23 @@ services:
       timeout: 5s
       retries: 12
       start_period: 15s
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postmerce-worker
+    restart: unless-stopped
+    command: ["node", "apps/app/dist/workers/publish-worker.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.server
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      STORAGE_ROOT: /app/storage
+      FFMPEG_PATH: ffmpeg
+      FFPROBE_PATH: ffprobe
+    volumes:
+      - ${POSTMERCE_STORAGE_DIR}:/app/storage

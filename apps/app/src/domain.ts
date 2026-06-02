@@ -163,3 +163,45 @@ export interface PostDetails {
   media: MediaAssetRecord | null;
   targets: PostTargetRecord[];
 }
+
+export interface PublishJobRecord {
+  id: number;
+  postTargetId: number | null;
+  jobType: "publish";
+  status: PublishJobStatus;
+  attempts: number;
+  maxAttempts: number;
+  runAfter: Date;
+  lockedAt: Date | null;
+  lockedUntil: Date | null;
+  lockedBy: string | null;
+  finishedAt: Date | null;
+  failedAt: Date | null;
+  errorClass: ErrorClass | null;
+  lastError: string | null;
+  idempotencyKey: string;
+  payload: Record<string, unknown>;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PublishJobListItem extends PublishJobRecord {
+  postId: number | null;
+  postTitle: string | null;
+  platform: Platform | null;
+  targetStatus: PostTargetStatus | null;
+  mediaOriginalFilename: string | null;
+}
+
+export interface PublishJobContext {
+  job: PublishJobRecord;
+  post: PostRecord;
+  target: PostTargetRecord;
+  media: MediaAssetRecord;
+}
+
+export interface WorkerHeartbeatRecord {
+  workerId: string;
+  lastSeenAt: Date;
+  metadata: Record<string, unknown>;
+}

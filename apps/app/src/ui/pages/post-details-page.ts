@@ -75,7 +75,7 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
       <section class="panel">
         <div class="section-heading">
           <h2>Targets</h2>
-          <span class="muted-label">Publishing jobs arrive in Stage 4</span>
+          <a class="text-link" href="/jobs">Open jobs</a>
         </div>
         ${targetCards(targets)}
       </section>

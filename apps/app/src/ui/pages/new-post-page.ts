@@ -160,7 +160,7 @@ export function newPostPage(options: NewPostPageOptions): string {
 
         <section class="form-actions">
           <button class="button-link secondary" type="submit" name="action" value="draft">Save draft</button>
-          <button class="button-link" type="submit" name="action" value="schedule">Save scheduled metadata</button>
+          <button class="button-link" type="submit" name="action" value="schedule">Queue dry-run publish</button>
         </section>
       </form>
     `

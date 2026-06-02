@@ -8,7 +8,7 @@ Deployment target: VPS behind Caddy or nginx.
 - PostgreSQL.
 - Caddy or nginx.
 - systemd service for the app.
-- systemd service for workers.
+- worker process, currently via Docker Compose service on staging.
 - FFmpeg/FFprobe installed for media stages.
 
 The current staging deploy uses Docker Compose on `tm-test-cx33-1`:
@@ -27,7 +27,7 @@ The current staging deploy uses Docker Compose on `tm-test-cx33-1`:
 4. Install dependencies.
 5. Run migrations.
 6. Start app service.
-7. Start worker service only after queue stage exists.
+7. Start worker service after migrations.
 8. Add Basic Auth at proxy level.
 9. Add backups.
 
@@ -42,7 +42,8 @@ From the local repo:
 ```
 
 The script deploys the current `HEAD`, not uncommitted files. It creates `.env.server`
-on the VPS if missing and preserves it on later deploys.
+on the VPS if missing, preserves it on later deploys, runs migrations, then starts
+the `app` and `worker` Compose services.
 
 ## Caddy Route
 

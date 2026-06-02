@@ -1,4 +1,5 @@
 import { pool } from "./client.js";
+import { createPublishJob } from "./queue-repository.js";
 import type {
   MediaAssetRecord,
   Platform,
@@ -78,6 +79,7 @@ export interface CreatePostInput {
   status: PostStatus;
   scheduledAt: Date | null;
   targets: CreatePostTargetInput[];
+  enqueueJobs?: boolean;
 }
 
 export interface CreatePostTargetInput {
@@ -88,6 +90,12 @@ export interface CreatePostTargetInput {
   platformOptions: Record<string, string>;
   status: PostTargetStatus;
   scheduledAt: Date | null;
+}
+
+export interface CreatePostOutput {
+  post: PostRecord;
+  targets: PostTargetRecord[];
+  enqueuedJobCount: number;
 }
 
 function toPost(row: PostRow): PostRecord {
@@ -153,7 +161,7 @@ function toMediaAsset(row: MediaAssetRow): MediaAssetRecord {
   };
 }
 
-export async function createPostWithTargets(input: CreatePostInput): Promise<PostRecord> {
+export async function createPostWithTargets(input: CreatePostInput): Promise<CreatePostOutput> {
   const client = await pool.connect();
 
   try {
@@ -187,8 +195,11 @@ export async function createPostWithTargets(input: CreatePostInput): Promise<Pos
       throw new Error("Failed to create post.");
     }
 
+    const targets: PostTargetRecord[] = [];
+    let enqueuedJobCount = 0;
+
     for (const target of input.targets) {
-      await client.query(
+      const targetResult = await client.query<PostTargetRow>(
         `
           insert into post_targets (
             post_id,
@@ -201,6 +212,7 @@ export async function createPostWithTargets(input: CreatePostInput): Promise<Pos
             scheduled_at
           )
           values ($1, $2, $3, $4, $5, $6, $7, $8)
+          returning *
         `,
         [
           post.id,
@@ -213,10 +225,36 @@ export async function createPostWithTargets(input: CreatePostInput): Promise<Pos
           target.scheduledAt
         ]
       );
+      const targetRow = targetResult.rows[0];
+
+      if (!targetRow) {
+        throw new Error("Failed to create post target.");
+      }
+
+      const createdTarget = toPostTarget(targetRow);
+      targets.push(createdTarget);
+
+      if (input.enqueueJobs) {
+        await createPublishJob(client, {
+          postTargetId: createdTarget.id,
+          runAfter: target.scheduledAt ?? new Date(),
+          idempotencyKey: `publish:${createdTarget.id}`,
+          payload: {
+            postId: Number(post.id),
+            platform: createdTarget.platform,
+            source: "post_form"
+          }
+        });
+        enqueuedJobCount += 1;
+      }
     }
 
     await client.query("commit");
-    return toPost(post);
+    return {
+      post: toPost(post),
+      targets,
+      enqueuedJobCount
+    };
   } catch (error) {
     await client.query("rollback");
     throw error;

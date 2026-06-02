@@ -12,6 +12,7 @@ npm run dev:app
 npm run dev:marketing
 npm run migrate
 npm run worker
+npm run worker:once
 ```
 
 ## Healthcheck
@@ -40,7 +41,34 @@ These folders are runtime data and are ignored by Git.
 
 ## Workers
 
-Workers should run as separate processes under systemd on VPS. The worker must be safe to restart.
+Workers run as separate processes and must be safe to restart.
+
+Current staging uses a Docker Compose `worker` service with:
+
+```text
+node apps/app/dist/workers/publish-worker.js
+```
+
+Useful local smoke command:
+
+```powershell
+npm run worker:once
+```
+
+The worker:
+
+- claims due `publish_jobs` with PostgreSQL row locks,
+- marks targets as `publishing`,
+- uses the dry-run publisher while `DRY_RUN=true`,
+- marks successful targets as `simulated`,
+- writes `worker_heartbeats`,
+- retries retryable failures with the policy in `src/services/retry.ts`.
+
+Manual retry/cancel actions are available at:
+
+```text
+GET /jobs
+```
 
 ## VPS Staging
 

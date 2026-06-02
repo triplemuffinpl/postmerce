@@ -41,7 +41,12 @@ export async function registerPostRoutes(server: FastifyInstance): Promise<void>
       );
     }
 
-    return reply.redirect(`/posts/${result.post.id}?notice=Post+created`);
+    const notice =
+      result.enqueuedJobCount > 0
+        ? `Post+created+and+${result.enqueuedJobCount}+jobs+queued`
+        : "Post+draft+created";
+
+    return reply.redirect(`/posts/${result.post.id}?notice=${notice}`);
   });
 
   server.get("/posts/:id", async (request, reply) => {

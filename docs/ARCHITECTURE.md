@@ -38,7 +38,7 @@ UI:
 
 ## Database Queue
 
-The queue should use PostgreSQL row locks:
+The queue uses PostgreSQL row locks:
 
 ```sql
 SELECT *
@@ -51,6 +51,14 @@ LIMIT 1;
 ```
 
 This gives simple multi-worker safety without RabbitMQ/Kafka.
+
+Current flow:
+
+- post creation can enqueue one `publish_jobs` row per target,
+- workers claim due rows and lock them for a bounded time,
+- dry-run publishing marks target rows as `simulated`,
+- retries and manual retry/cancel stay visible in `/jobs`,
+- worker liveness is recorded in `worker_heartbeats`.
 
 ## Storage
 

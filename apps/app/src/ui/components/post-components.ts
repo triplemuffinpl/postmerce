@@ -40,8 +40,17 @@ export function postStatusBadge(status: PostStatus): string {
     "status-badge",
     status === "draft" && "status-muted",
     status === "scheduled" && "status-ok",
+    status === "queued" && "status-ok",
+    status === "publishing" && "status-ok",
+    status === "published" && "status-ok",
     status === "failed" && "status-danger",
-    status !== "draft" && status !== "scheduled" && status !== "failed" && "status-muted"
+    status !== "draft" &&
+      status !== "scheduled" &&
+      status !== "queued" &&
+      status !== "publishing" &&
+      status !== "published" &&
+      status !== "failed" &&
+      "status-muted"
   ]);
 
   return `<span class="${className}">${postStatusLabels[status]}</span>`;
@@ -52,10 +61,18 @@ export function targetStatusBadge(status: PostTargetStatus): string {
     "status-badge",
     status === "draft" && "status-muted",
     status === "scheduled" && "status-ok",
+    status === "queued" && "status-ok",
+    status === "publishing" && "status-ok",
+    status === "published" && "status-ok",
+    status === "simulated" && "status-ok",
     status === "failed" && "status-danger",
     status === "requires_user_action" && "status-danger",
     status !== "draft" &&
       status !== "scheduled" &&
+      status !== "queued" &&
+      status !== "publishing" &&
+      status !== "published" &&
+      status !== "simulated" &&
       status !== "failed" &&
       status !== "requires_user_action" &&
       "status-muted"

@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint",
     "migrate": "npm run migrate -w @postmerce/app",
-    "worker": "npm run worker -w @postmerce/app"
+    "worker": "npm run worker -w @postmerce/app",
+    "worker:once": "npm run worker:once -w @postmerce/app"
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",

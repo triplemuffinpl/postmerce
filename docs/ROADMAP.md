@@ -28,11 +28,12 @@
 
 ## Stage 4 - Queue
 
-- Enqueue publish jobs.
-- Worker locking.
-- Retry policy.
-- Manual retry/cancel.
-- Worker heartbeat.
+- Enqueue publish jobs. Done in stage 4.
+- Worker locking. Done in stage 4.
+- Retry policy. Done in stage 4.
+- Manual retry/cancel. Done in stage 4.
+- Worker heartbeat. Done in stage 4.
+- Dry-run worker publishing. Done in stage 4.
 
 ## Stage 5 - First Real Adapter
 

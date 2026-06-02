@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "migrate": "tsx src/db/migrate.ts",
-    "worker": "tsx src/workers/publish-worker.ts"
+    "worker": "tsx src/workers/publish-worker.ts",
+    "worker:once": "tsx src/workers/publish-worker.ts --once"
   },
   "dependencies": {
     "@fastify/formbody": "^8.0.2",

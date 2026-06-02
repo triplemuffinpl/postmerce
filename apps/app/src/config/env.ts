@@ -45,7 +45,10 @@ const envSchema = z.object({
   ENABLE_LINKEDIN: booleanFromEnv.default("true"),
   ENABLE_INSTAGRAM: booleanFromEnv.default("false"),
   ENABLE_FACEBOOK: booleanFromEnv.default("false"),
-  ENABLE_TIKTOK: booleanFromEnv.default("false")
+  ENABLE_TIKTOK: booleanFromEnv.default("false"),
+  WORKER_POLL_MS: z.coerce.number().int().positive().default(5000),
+  WORKER_LOCK_SECONDS: z.coerce.number().int().positive().default(300),
+  WORKER_BATCH_SIZE: z.coerce.number().int().positive().default(5)
 });
 
 const parsed = envSchema.parse(process.env);
@@ -74,5 +77,8 @@ export const env = {
     instagram: parsed.ENABLE_INSTAGRAM,
     facebook: parsed.ENABLE_FACEBOOK,
     tiktok: parsed.ENABLE_TIKTOK
-  }
+  },
+  workerPollMs: parsed.WORKER_POLL_MS,
+  workerLockSeconds: parsed.WORKER_LOCK_SECONDS,
+  workerBatchSize: parsed.WORKER_BATCH_SIZE
 } as const;
