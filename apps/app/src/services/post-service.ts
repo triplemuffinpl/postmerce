@@ -6,15 +6,17 @@ import {
   type CreatePostInput,
   type CreatePostTargetInput
 } from "../db/post-repository.js";
+import { listConnectedSocialAccounts } from "../db/account-repository.js";
 import { getRecentMedia } from "./media-service.js";
 import { getPlatformConfigs } from "./platform-registry.js";
 import type { FormRecord } from "../http/form.js";
 import { formValue, formValues, optionalDateTimeLocal } from "../http/form.js";
-import type { MediaAssetRecord } from "../domain.js";
+import type { MediaAssetRecord, SocialAccountRecord } from "../domain.js";
 
 export interface NewPostFormData {
   media: MediaAssetRecord[];
   platforms: ReturnType<typeof getPlatformConfigs>;
+  accounts: SocialAccountRecord[];
 }
 
 export interface CreatePostResult {
@@ -33,12 +35,50 @@ function emptyToNull(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
+function optionalPositiveInteger(value: string): number | null {
+  if (!value.trim()) {
+    return null;
+  }
+
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function targetAccountId(
+  form: FormRecord,
+  platform: Platform,
+  accountsById: Map<number, SocialAccountRecord>,
+  errors: string[]
+): number | null {
+  const accountId = optionalPositiveInteger(formValue(form, `${platform}_account_id`));
+
+  if (accountId === null) {
+    return null;
+  }
+
+  const account = accountsById.get(accountId);
+
+  if (!account) {
+    errors.push(`Selected ${platform} account does not exist.`);
+    return null;
+  }
+
+  if (account.platform !== platform || account.status !== "connected") {
+    errors.push(`Selected account is not a connected ${platform} account.`);
+    return null;
+  }
+
+  return account.id;
+}
+
 function buildTargets(
   form: FormRecord,
   scheduledAt: Date | null,
   targetStatus: CreatePostTargetInput["status"],
   baseTitle: string,
-  baseHashtags: string | null
+  baseHashtags: string | null,
+  accountsById: Map<number, SocialAccountRecord>,
+  errors: string[]
 ): CreatePostTargetInput[] {
   const enabledPlatforms = new Set(formValues(form, "platforms"));
 
@@ -50,6 +90,7 @@ function buildTargets(
       const caption = formValue(form, `${platform}_caption`).trim() || formValue(form, "base_caption").trim();
 
       return {
+        socialAccountId: targetAccountId(form, platform, accountsById, errors),
         platform,
         platformTitle: emptyToNull(formValue(form, `${platform}_title`)) ?? baseTitle,
         platformCaption: caption,
@@ -65,11 +106,15 @@ function buildTargets(
 }
 
 export async function getNewPostFormData(): Promise<NewPostFormData> {
-  const media = (await getRecentMedia()).filter((item) => item.status === "ready");
+  const [media, accounts] = await Promise.all([
+    getRecentMedia(),
+    listConnectedSocialAccounts()
+  ]);
 
   return {
-    media,
-    platforms: getPlatformConfigs()
+    media: media.filter((item) => item.status === "ready"),
+    platforms: getPlatformConfigs(),
+    accounts
   };
 }
 
@@ -84,7 +129,9 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
   const scheduledAt = optionalDateTimeLocal(formValue(form, "scheduled_at"));
   const postStatus: CreatePostInput["status"] = shouldQueue ? "queued" : "draft";
   const targetStatus: CreatePostTargetInput["status"] = shouldQueue ? "queued" : "draft";
-  const targets = buildTargets(form, scheduledAt, targetStatus, title, baseHashtags);
+  const accounts = await listConnectedSocialAccounts();
+  const accountsById = new Map(accounts.map((account) => [account.id, account]));
+  const targets = buildTargets(form, scheduledAt, targetStatus, title, baseHashtags, accountsById, errors);
 
   if (!Number.isInteger(mediaAssetId) || mediaAssetId <= 0) {
     errors.push("Choose a ready media asset.");

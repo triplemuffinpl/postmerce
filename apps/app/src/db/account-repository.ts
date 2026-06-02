@@ -193,6 +193,19 @@ export async function listSocialAccounts(): Promise<SocialAccountRecord[]> {
   return result.rows.map(toSocialAccount);
 }
 
+export async function listConnectedSocialAccounts(): Promise<SocialAccountRecord[]> {
+  const result = await pool.query<SocialAccountRow>(
+    `
+      select *
+      from social_accounts
+      where status = 'connected'
+      order by platform asc, display_name asc nulls last, id asc
+    `
+  );
+
+  return result.rows.map(toSocialAccount);
+}
+
 export async function getSocialAccountById(id: number): Promise<SocialAccountRecord | null> {
   const result = await pool.query<SocialAccountRow>("select * from social_accounts where id = $1 limit 1", [id]);
 

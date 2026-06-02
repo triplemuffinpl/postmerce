@@ -1,4 +1,4 @@
-import type { MediaAssetRecord, PlatformConfig } from "../../domain.js";
+import type { MediaAssetRecord, PlatformConfig, SocialAccountRecord } from "../../domain.js";
 import { mediaThumbnail } from "../components/media-components.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
@@ -6,6 +6,7 @@ import { layout } from "../layout.js";
 interface NewPostPageOptions {
   media: MediaAssetRecord[];
   platforms: PlatformConfig[];
+  accounts: SocialAccountRecord[];
   errors?: string[];
 }
 
@@ -56,7 +57,39 @@ function mediaPreviewGrid(media: MediaAssetRecord[]): string {
   `;
 }
 
-function platformFields(platforms: PlatformConfig[]): string {
+function accountLabel(account: SocialAccountRecord): string {
+  return account.displayName ?? account.username ?? account.platformUserId ?? `Konto #${account.id}`;
+}
+
+function accountOptions(accounts: SocialAccountRecord[], platform: PlatformConfig): string {
+  const platformAccounts = accounts.filter((account) => account.platform === platform.platform);
+
+  if (platformAccounts.length === 0) {
+    return `<option value="">Auto / dry-run / brak polaczonego konta</option>`;
+  }
+
+  return [
+    `<option value="">Auto: pierwsze polaczone konto</option>`,
+    ...platformAccounts.map((account, index) => {
+      const selected = index === 0 ? "selected" : "";
+      return `<option value="${account.id}" ${selected}>${escapeHtml(accountLabel(account))} (#${account.id})</option>`;
+    })
+  ].join("");
+}
+
+function accountHint(accounts: SocialAccountRecord[], platform: PlatformConfig): string {
+  const platformAccounts = accounts.filter((account) => account.platform === platform.platform);
+
+  if (platformAccounts.length > 0) {
+    return "Wybrane konto zostanie zapisane przy tym targecie.";
+  }
+
+  return platform.platform === "youtube"
+    ? `Brak polaczonego konta. <a class="text-link" href="/accounts">Polacz w zakladce Konta</a>.`
+    : "Brak polaczonego konta. W dry-run target nadal moze byc kolejkowany.";
+}
+
+function platformFields(platforms: PlatformConfig[], accounts: SocialAccountRecord[]): string {
   return platforms
     .map((platform) => {
       const disabled = platform.enabled ? "" : "disabled";
@@ -71,9 +104,18 @@ function platformFields(platforms: PlatformConfig[]): string {
           </label>
           <div class="form-grid two">
             <label>
+              <span>Konto publikujace</span>
+              <select name="${platformId}_account_id" ${disabled}>
+                ${accountOptions(accounts, platform)}
+              </select>
+            </label>
+            <label>
               <span>Tytuł dla ${escapeHtml(platform.label)}</span>
               <input name="${platformId}_title" type="text" ${disabled} placeholder="Zostaw puste, aby użyć tytułu bazowego" />
             </label>
+          </div>
+          <p style="color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; font-weight: 600;">${accountHint(accounts, platform)}</p>
+          <div class="form-grid two" style="margin-top: 14px;">
             <label>
               <span>Widoczność (Privacy)</span>
               <select name="${platformId}_privacy" ${disabled}>
@@ -164,7 +206,7 @@ export function newPostPage(options: NewPostPageOptions): string {
             <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Możesz dostosować tytuły, opisy i opcje prywatności niezależnie dla każdej platformy.</p>
           </div>
           <div class="platform-editor-grid">
-            ${platformFields(options.platforms)}
+            ${platformFields(options.platforms, options.accounts)}
           </div>
         </section>
 

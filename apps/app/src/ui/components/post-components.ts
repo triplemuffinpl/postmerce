@@ -234,6 +234,10 @@ export function targetCards(targets: PostTargetRecord[]): string {
                   <dd style="font-weight: 700;">${escapeHtml(String(target.platformOptions.privacy ?? "domyślna"))}</dd>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                  <dt style="color: var(--muted); font-weight: 600;">Konto</dt>
+                  <dd style="font-weight: 700;">${target.socialAccountId === null ? "auto" : `#${target.socialAccountId}`}</dd>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                   <dt style="color: var(--muted); font-weight: 600;">Harmonogram</dt>
                   <dd style="font-weight: 700;">${target.scheduledAt ? escapeHtml(target.scheduledAt.toLocaleString("pl-PL")) : "brak"}</dd>
                 </div>

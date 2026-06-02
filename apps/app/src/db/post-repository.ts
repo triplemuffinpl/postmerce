@@ -83,6 +83,7 @@ export interface CreatePostInput {
 }
 
 export interface CreatePostTargetInput {
+  socialAccountId: number | null;
   platform: Platform;
   platformTitle: string | null;
   platformCaption: string;
@@ -203,6 +204,7 @@ export async function createPostWithTargets(input: CreatePostInput): Promise<Cre
         `
           insert into post_targets (
             post_id,
+            social_account_id,
             platform,
             platform_title,
             platform_caption,
@@ -211,11 +213,12 @@ export async function createPostWithTargets(input: CreatePostInput): Promise<Cre
             status,
             scheduled_at
           )
-          values ($1, $2, $3, $4, $5, $6, $7, $8)
+          values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
           returning *
         `,
         [
           post.id,
+          target.socialAccountId,
           target.platform,
           target.platformTitle,
           target.platformCaption,
