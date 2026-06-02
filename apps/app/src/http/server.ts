@@ -31,7 +31,7 @@ export async function createServer() {
     throwFileSizeLimit: true
   });
   await server.register(fastifyStatic, {
-    root: path.join(appRoot, "public"),
+    root: path.join(appRoot, "public", "assets"),
     prefix: "/assets/"
   });
   await server.register(fastifyStatic, {
