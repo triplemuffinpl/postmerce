@@ -15,15 +15,20 @@ function noticeBanner(message: string | undefined): string {
 export function postDetailsPage(options: PostDetailsPageOptions): string {
   if (!options.details) {
     return layout({
-      title: "Post not found",
+      title: "Nie znaleziono wpisu",
       active: "posts",
       body: `
         <section class="page-header compact">
-          <p class="eyebrow">Publishing workflow</p>
-          <h1>Post not found</h1>
-          <p class="lead">This post does not exist.</p>
+          <p class="eyebrow">Dystrybucja postów</p>
+          <h1>Wpis nie istnieje</h1>
+          <p class="lead">Zasób wpisu o podanym identyfikatorze nie istnieje.</p>
         </section>
-        <a class="button-link" href="/posts">Back to posts</a>
+        <a class="button-link" href="/posts">
+          <svg style="width:16px; height:16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Powrót do listy wpisów
+        </a>
       `
     });
   }
@@ -34,53 +39,68 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
     title: post.title,
     active: "posts",
     body: `
+      <div style="margin-bottom: 24px;">
+        <a class="text-link" href="/posts" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: 0.9rem;">
+          <svg style="width: 16px; height: 16px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+          </svg>
+          Powrót do listy wpisów
+        </a>
+      </div>
+
       <section class="page-header compact">
-        <p class="eyebrow">Post #${post.id}</p>
-        <h1>${escapeHtml(post.title)}</h1>
-        <p class="lead">Parent copy plus ${targets.length} platform targets.</p>
+        <p class="eyebrow">Wpis #${post.id}</p>
+        <h1 style="font-weight: 800; letter-spacing: -0.03em; word-break: break-all;">${escapeHtml(post.title)}</h1>
+        <p class="lead">Tekst bazowy powiązany z ${targets.length} celami platform społecznościowych.</p>
       </section>
 
       ${noticeBanner(options.notice)}
 
-      <section class="media-detail-grid">
-        <div class="media-preview large">
+      <!-- Media Preview & Metadata Split Grid -->
+      <section class="media-detail-grid" style="margin-bottom: 32px;">
+        <div class="media-preview large" style="height: 100%; min-height: 380px; box-shadow: var(--shadow-md);">
           ${postMediaPreview(media)}
         </div>
         <div class="panel">
-          <div class="section-heading">
-            <h2>Post</h2>
+          <div class="panel-header" style="margin-bottom: 20px;">
+            <div style="display: grid; gap: 4px;">
+              <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Dane wpisu</h2>
+              <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Opisy domyślne powiązane z wideo.</p>
+            </div>
             ${postStatusBadge(post.status)}
           </div>
-          <div class="details-list">
+          <div class="details-list" style="border: none; box-shadow: none; padding: 0;">
             <div class="detail-row">
-              <span>Media</span>
-              <strong>${escapeHtml(media?.originalFilename ?? "No media")}</strong>
+              <span>Wideo</span>
+              <strong style="word-break: break-all;">${escapeHtml(media?.originalFilename ?? "Brak pliku wideo")}</strong>
             </div>
             <div class="detail-row">
-              <span>Scheduled</span>
-              <strong>${post.scheduledAt ? escapeHtml(post.scheduledAt.toLocaleString("pl-PL")) : "none"}</strong>
+              <span>Harmonogram</span>
+              <strong>${post.scheduledAt ? escapeHtml(post.scheduledAt.toLocaleString("pl-PL")) : `<span style="color:var(--muted); font-weight:500;">Brak (publikacja ręczna)</span>`}</strong>
             </div>
             <div class="detail-row">
-              <span>Base tags</span>
-              <strong>${escapeHtml(post.baseHashtags ?? "none")}</strong>
+              <span>Tagi bazowe</span>
+              <strong>${escapeHtml(post.baseHashtags ?? "brak")}</strong>
             </div>
           </div>
-          <div class="copy-block">
-            <span>Base caption</span>
-            <p>${escapeHtml(post.baseCaption || "No base caption")}</p>
+          <div class="copy-block" style="margin-top: 14px; padding-top: 14px;">
+            <span>Opis bazowy</span>
+            <p style="margin-top: 8px; font-size:0.95rem; line-height:1.55; color: var(--muted);">${escapeHtml(post.baseCaption || "Brak opisu bazowego")}</p>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="section-heading">
-          <h2>Targets</h2>
-          <a class="text-link" href="/jobs">Open jobs</a>
+      <!-- Targets list panel -->
+      <section class="panel" style="margin-bottom: 32px;">
+        <div class="panel-header" style="margin-bottom: 24px;">
+          <div style="display: grid; gap: 4px;">
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Cele Dystrybucji</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Podgląd dedykowanych wersji opisów dla wybranych platform social.</p>
+          </div>
+          <a class="text-link" style="font-weight:700;" href="/jobs">Pokaż kolejkę (Jobs)</a>
         </div>
         ${targetCards(targets)}
       </section>
-
-      <a class="button-link secondary" href="/posts">Back to posts</a>
     `
   });
 }
