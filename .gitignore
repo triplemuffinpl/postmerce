@@ -10,6 +10,11 @@ storage/thumbnails/
 storage/temp/
 storage/backups/
 storage/logs/
+apps/app/storage/uploads/
+apps/app/storage/thumbnails/
+apps/app/storage/temp/
+apps/app/storage/backups/
+apps/app/storage/logs/
 *.log
 Thumbs.db
 .DS_Store

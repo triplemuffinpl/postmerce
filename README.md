@@ -35,11 +35,13 @@ scripts/      local/deploy helper scripts
 ```powershell
 npm install
 Copy-Item .env.example .env
+docker compose -f docker-compose.dev.yml up -d
+npm run migrate
 npm run dev:marketing
 npm run dev:app
 ```
 
-The app expects PostgreSQL for migrations and database health checks. Dry-run mode is enabled by default.
+The app uses PostgreSQL through `docker-compose.dev.yml` for local development. Dry-run mode is enabled by default.
 
 ## Working Rules
 

@@ -31,9 +31,14 @@ const envSchema = z.object({
   DATABASE_URL: z
     .string()
     .url()
-    .default("postgres://postmerce:postmerce@127.0.0.1:5432/postmerce"),
+    .default("postgres://postmerce:postmerce@127.0.0.1:55432/postmerce"),
+  STORAGE_ROOT: z.string().default("./storage"),
+  FFMPEG_PATH: z.string().default("ffmpeg"),
+  FFPROBE_PATH: z.string().default("ffprobe"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().default(500),
   MAX_DURATION_SECONDS: z.coerce.number().int().positive().default(600),
+  MAX_VIDEO_WIDTH: z.coerce.number().int().positive().default(3840),
+  MAX_VIDEO_HEIGHT: z.coerce.number().int().positive().default(3840),
   CLEANUP_AFTER_DAYS: z.coerce.number().int().positive().default(30),
   DRY_RUN: booleanFromEnv.default("true"),
   ENABLE_YOUTUBE: booleanFromEnv.default("true"),
@@ -54,8 +59,13 @@ export const env = {
   appSecret: parsed.APP_SECRET,
   encryptionKey: parsed.ENCRYPTION_KEY,
   databaseUrl: parsed.DATABASE_URL,
+  storageRoot: path.resolve(parsed.STORAGE_ROOT),
+  ffmpegPath: parsed.FFMPEG_PATH,
+  ffprobePath: parsed.FFPROBE_PATH,
   maxUploadMb: parsed.MAX_UPLOAD_MB,
   maxDurationSeconds: parsed.MAX_DURATION_SECONDS,
+  maxVideoWidth: parsed.MAX_VIDEO_WIDTH,
+  maxVideoHeight: parsed.MAX_VIDEO_HEIGHT,
   cleanupAfterDays: parsed.CLEANUP_AFTER_DAYS,
   dryRun: parsed.DRY_RUN,
   enabledPlatforms: {

@@ -93,13 +93,23 @@ export interface PostTargetDraft {
 
 export interface MediaAssetRecord {
   id: number;
+  originalFilename: string;
+  storageDisk: string;
+  storageKey: string;
   storagePath: string;
+  thumbnailPath: string | null;
   mimeType: string;
   sizeBytes: number;
   durationSec: number | null;
   width: number | null;
   height: number | null;
+  fps: number | null;
+  videoCodec: string | null;
+  audioCodec: string | null;
+  checksum: string;
   status: MediaStatus;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SocialAccountRecord {

@@ -12,11 +12,11 @@
 
 ## Stage 2 - Media
 
-- Video upload.
-- Local storage.
-- FFprobe metadata.
-- Thumbnail generation.
-- Media list and details.
+- Video upload. Done in foundation stage 2.
+- Local storage. Done in foundation stage 2.
+- FFprobe metadata. Done in foundation stage 2.
+- Thumbnail generation. Done in foundation stage 2.
+- Media list and details. Done in foundation stage 2.
 
 ## Stage 3 - Posts And Targets
 
