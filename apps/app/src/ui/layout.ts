@@ -1,4 +1,5 @@
 import { nav } from "./components/nav.js";
+import { escapeHtml } from "./html.js";
 
 interface LayoutOptions {
   title: string;
@@ -12,7 +13,7 @@ export function layout(options: LayoutOptions): string {
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>${options.title} - Postmerce</title>
+        <title>${escapeHtml(options.title)} - Postmerce</title>
         
         <!-- Preconnect Google Fonts for faster load times -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
