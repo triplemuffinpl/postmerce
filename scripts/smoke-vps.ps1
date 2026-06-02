@@ -13,16 +13,16 @@ if ($UserName -and $Password) {
 }
 
 $health = Invoke-WebRequest -Uri "$Url/health" -Headers $headers -UseBasicParsing
-$home = Invoke-WebRequest -Uri "$Url/" -Headers $headers -UseBasicParsing
+$homeResponse = Invoke-WebRequest -Uri "$Url/" -Headers $headers -UseBasicParsing
 $media = Invoke-WebRequest -Uri "$Url/media" -Headers $headers -UseBasicParsing
 $posts = Invoke-WebRequest -Uri "$Url/posts" -Headers $headers -UseBasicParsing
 $jobs = Invoke-WebRequest -Uri "$Url/jobs" -Headers $headers -UseBasicParsing
 
 [pscustomobject]@{
   Health = $health.StatusCode
-  Home = $home.StatusCode
+  Home = $homeResponse.StatusCode
   Media = $media.StatusCode
   Posts = $posts.StatusCode
   Jobs = $jobs.StatusCode
-  HasPostmerce = $home.Content.Contains("Postmerce")
+  HasPostmerce = $homeResponse.Content.Contains("Postmerce")
 }

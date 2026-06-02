@@ -74,7 +74,7 @@ fi
 docker compose --env-file .env.server -f docker-compose.staging.yml build app worker
 docker compose --env-file .env.server -f docker-compose.staging.yml up -d postgres
 docker compose --env-file .env.server -f docker-compose.staging.yml run --rm app node apps/app/dist/db/migrate.js
-docker compose --env-file .env.server -f docker-compose.staging.yml up -d app worker
+docker compose --env-file .env.server -f docker-compose.staging.yml up -d --force-recreate app worker
 docker compose --env-file .env.server -f docker-compose.staging.yml ps
 '@
 
