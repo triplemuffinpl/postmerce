@@ -85,13 +85,17 @@ $remoteScript = $remoteScript.
 $remoteScript = $remoteScript.Replace("`r`n", "`n")
 
 $remoteScriptPath = Join-Path ([System.IO.Path]::GetTempPath()) "postmerce-deploy-$commit.sh"
+$remoteScriptRemotePath = "/tmp/postmerce-deploy-$commit.sh"
 [System.IO.File]::WriteAllText(
   $remoteScriptPath,
   $remoteScript,
   [System.Text.UTF8Encoding]::new($false)
 )
 
-Get-Content -LiteralPath $remoteScriptPath -Raw | ssh -i $KeyPath "${User}@${HostName}" "bash -s"
+scp -i $KeyPath $remoteScriptPath "${User}@${HostName}:$remoteScriptRemotePath"
+
+$remoteDeployCommand = "bash $remoteScriptRemotePath; status=`$?; rm -f $remoteScriptRemotePath; exit `$status"
+ssh -i $KeyPath "${User}@${HostName}" $remoteDeployCommand
 
 Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $remoteScriptPath -Force -ErrorAction SilentlyContinue
