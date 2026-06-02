@@ -42,6 +42,22 @@ These folders are runtime data and are ignored by Git.
 
 Workers should run as separate processes under systemd on VPS. The worker must be safe to restart.
 
+## VPS Staging
+
+Current staging host:
+
+```text
+https://postmerce-91-99-63-80.sslip.io
+```
+
+Deploy from a clean committed local tree:
+
+```powershell
+.\scripts\deploy-vps.ps1
+```
+
+The app runs in Docker Compose under `/srv/apps/postmerce`; runtime data lives under `/srv/data/postmerce`.
+
 ## Logs
 
 Never log secrets. Platform events and app logs should store redacted payloads.

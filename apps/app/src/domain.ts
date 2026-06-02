@@ -119,3 +119,47 @@ export interface SocialAccountRecord {
   username: string | null;
   status: SocialAccountStatus;
 }
+
+export interface PostRecord {
+  id: number;
+  mediaAssetId: number | null;
+  title: string;
+  baseCaption: string;
+  baseHashtags: string | null;
+  status: PostStatus;
+  scheduledAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PostTargetRecord {
+  id: number;
+  postId: number;
+  socialAccountId: number | null;
+  platform: Platform;
+  platformTitle: string | null;
+  platformCaption: string;
+  platformHashtags: string | null;
+  platformOptions: Record<string, unknown>;
+  status: PostTargetStatus;
+  externalPostId: string | null;
+  externalUrl: string | null;
+  errorCode: string | null;
+  errorMessage: string | null;
+  scheduledAt: Date | null;
+  publishedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PostListItem extends PostRecord {
+  mediaOriginalFilename: string | null;
+  mediaThumbnailPath: string | null;
+  targetCount: number;
+}
+
+export interface PostDetails {
+  post: PostRecord;
+  media: MediaAssetRecord | null;
+  targets: PostTargetRecord[];
+}

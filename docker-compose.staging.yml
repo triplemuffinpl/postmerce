@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postmerce-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ${POSTMERCE_POSTGRES_DATA_DIR}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: postmerce-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env.server
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 4310
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      STORAGE_ROOT: /app/storage
+      FFMPEG_PATH: ffmpeg
+      FFPROBE_PATH: ffprobe
+    ports:
+      - "127.0.0.1:${POSTMERCE_BIND_PORT}:4310"
+    volumes:
+      - ${POSTMERCE_STORAGE_DIR}:/app/storage
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:4310/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s

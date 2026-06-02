@@ -1,6 +1,18 @@
+import type { PostListItem } from "../../domain.js";
+import { postTable } from "../components/post-components.js";
+import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 
-export function postsPage(): string {
+interface PostsPageOptions {
+  posts: PostListItem[];
+  notice?: string;
+}
+
+function noticeBanner(message: string | undefined): string {
+  return message ? `<div class="message notice">${escapeHtml(message)}</div>` : "";
+}
+
+export function postsPage(options: PostsPageOptions): string {
   return layout({
     title: "Posts",
     active: "posts",
@@ -8,11 +20,25 @@ export function postsPage(): string {
       <section class="page-header compact">
         <p class="eyebrow">Publishing workflow</p>
         <h1>Posts</h1>
-        <p class="lead">Draft creation, per-platform captions and scheduling come after the media stage.</p>
+        <p class="lead">Create one parent post, then shape independent target copies per platform.</p>
       </section>
-      <section class="empty-state">
-        <h2>No posts yet</h2>
-        <p>Postmerce will keep one parent post and independent platform targets with their own statuses.</p>
+
+      ${noticeBanner(options.notice)}
+
+      <section class="panel action-panel">
+        <div>
+          <h2>New post</h2>
+          <p>Use a ready media asset, add base copy and choose target platforms.</p>
+        </div>
+        <a class="button-link" href="/posts/new">Create post</a>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <h2>Recent posts</h2>
+          <span class="muted-label">${options.posts.length} posts</span>
+        </div>
+        ${postTable(options.posts)}
       </section>
     `
   });

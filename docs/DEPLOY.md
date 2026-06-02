@@ -11,6 +11,14 @@ Deployment target: VPS behind Caddy or nginx.
 - systemd service for workers.
 - FFmpeg/FFprobe installed for media stages.
 
+The current staging deploy uses Docker Compose on `tm-test-cx33-1`:
+
+- app directory: `/srv/apps/postmerce`
+- data directory: `/srv/data/postmerce`
+- internal app port: `4310`
+- host bind port: `127.0.0.1:4501`
+- test host: `https://postmerce-91-99-63-80.sslip.io`
+
 ## First VPS Deploy Checklist
 
 1. Read the VPS source of truth in `vps-tm-test-cx33-1/VPS.md`.
@@ -24,3 +32,24 @@ Deployment target: VPS behind Caddy or nginx.
 9. Add backups.
 
 Do not deploy over an existing app or port without checking the VPS map first.
+
+## Deploy Command
+
+From the local repo:
+
+```powershell
+.\scripts\deploy-vps.ps1
+```
+
+The script deploys the current `HEAD`, not uncommitted files. It creates `.env.server`
+on the VPS if missing and preserves it on later deploys.
+
+## Caddy Route
+
+The test host should reverse proxy to:
+
+```text
+127.0.0.1:4501
+```
+
+Use proxy-level Basic Auth for the private panel until SaaS auth exists.

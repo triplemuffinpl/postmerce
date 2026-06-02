@@ -1,0 +1,11 @@
+.git
+node_modules
+dist
+.astro
+.env
+.env.*
+storage
+apps/app/storage
+apps/marketing/dist
+tmp-smoke
+*.log

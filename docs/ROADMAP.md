@@ -20,11 +20,11 @@
 
 ## Stage 3 - Posts And Targets
 
-- Create draft posts.
-- Add per-platform targets.
-- Platform options.
-- Schedule now/later.
-- Post detail screen.
+- Create draft posts. Done in stage 3.
+- Add per-platform targets. Done in stage 3.
+- Platform options. Done in stage 3.
+- Schedule metadata. Done in stage 3.
+- Post detail screen. Done in stage 3.
 
 ## Stage 4 - Queue
 
