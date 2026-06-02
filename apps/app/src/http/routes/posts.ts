@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { listConnectedSocialAccounts } from "../../db/account-repository.js";
 import { bodyToFormRecord } from "../form.js";
 import { createPostFromForm, getNewPostFormData, getPostDetails, getPostList } from "../../services/post-service.js";
 import { newPostPage } from "../../ui/pages/new-post-page.js";
@@ -55,11 +56,13 @@ export async function registerPostRoutes(server: FastifyInstance): Promise<void>
     const id = Number(params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
-      return reply.code(404).type("text/html").send(postDetailsPage({ details: null }));
+      return reply.code(404).type("text/html").send(postDetailsPage({ details: null, accounts: [] }));
     }
 
     const details = await getPostDetails(id);
     const notice = firstQueryValue(query.notice);
+    const error = firstQueryValue(query.error);
+    const accounts = await listConnectedSocialAccounts();
 
     return reply
       .code(details ? 200 : 404)
@@ -67,7 +70,9 @@ export async function registerPostRoutes(server: FastifyInstance): Promise<void>
       .send(
         postDetailsPage({
           details,
-          ...(notice ? { notice } : {})
+          accounts,
+          ...(notice ? { notice } : {}),
+          ...(error ? { error } : {})
         })
       );
   });

@@ -1,15 +1,22 @@
-import type { PostDetails } from "../../domain.js";
-import { postMediaPreview, postStatusBadge, targetCards } from "../components/post-components.js";
+import type { PostDetails, SocialAccountRecord } from "../../domain.js";
+import { postMediaPreview, postStatusBadge, targetCards, targetStatusBadge, platformLabel } from "../components/post-components.js";
+import { targetEditorForm } from "../components/target-control-components.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 
 interface PostDetailsPageOptions {
   details: PostDetails | null;
+  accounts: SocialAccountRecord[];
   notice?: string;
+  error?: string;
 }
 
 function noticeBanner(message: string | undefined): string {
   return message ? `<div class="message notice">${escapeHtml(message)}</div>` : "";
+}
+
+function errorBanner(message: string | undefined): string {
+  return message ? `<div class="message error">${escapeHtml(message)}</div>` : "";
 }
 
 export function postDetailsPage(options: PostDetailsPageOptions): string {
@@ -55,6 +62,7 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
       </section>
 
       ${noticeBanner(options.notice)}
+      ${errorBanner(options.error)}
 
       <!-- Media Preview & Metadata Split Grid -->
       <section class="media-detail-grid" style="margin-bottom: 32px;">
@@ -100,6 +108,32 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
           <a class="text-link" style="font-weight:700;" href="/jobs">Pokaż kolejkę (Jobs)</a>
         </div>
         ${targetCards(targets)}
+      </section>
+
+      <section class="panel" style="margin-bottom: 32px;">
+        <div class="panel-header" style="margin-bottom: 24px;">
+          <div style="display: grid; gap: 4px;">
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Edycja i akcje targetow</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Zmien konto, harmonogram, opis albo od razu kolejkuj wybrany target.</p>
+          </div>
+          <a class="text-link" href="/control">Centrum kontroli</a>
+        </div>
+        <div class="target-grid">
+          ${targets
+            .map((target) => `
+              <article class="target-card">
+                <div class="target-card-head">
+                  <div>
+                    <h3>${escapeHtml(platformLabel(target.platform))} #${target.id}</h3>
+                    <p class="row-meta" style="margin: 4px 0 0;">Konto: ${target.socialAccountId === null ? "auto" : `#${target.socialAccountId}`}</p>
+                  </div>
+                  ${targetStatusBadge(target.status)}
+                </div>
+                ${targetEditorForm(target, options.accounts, `/posts/${post.id}`)}
+              </article>
+            `)
+            .join("")}
+        </div>
       </section>
     `
   });
