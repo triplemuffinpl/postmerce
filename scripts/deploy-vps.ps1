@@ -82,9 +82,14 @@ $remoteScript = $remoteScript.
   Replace("__APP_DIR__", $AppDir).
   Replace("__DATA_DIR__", $DataDir).
   Replace("__REMOTE_ARCHIVE__", $remoteArchive)
+$remoteScript = $remoteScript.Replace("`r`n", "`n")
 
 $remoteScriptPath = Join-Path ([System.IO.Path]::GetTempPath()) "postmerce-deploy-$commit.sh"
-Set-Content -LiteralPath $remoteScriptPath -Value $remoteScript -Encoding UTF8
+[System.IO.File]::WriteAllText(
+  $remoteScriptPath,
+  $remoteScript,
+  [System.Text.UTF8Encoding]::new($false)
+)
 
 Get-Content -LiteralPath $remoteScriptPath -Raw | ssh -i $KeyPath "${User}@${HostName}" "bash -s"
 
