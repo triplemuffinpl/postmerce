@@ -1,26 +1,16 @@
 import type { PostTargetRecord, SocialAccountRecord } from "../../domain.js";
 import type { TargetControlItem } from "../../db/target-repository.js";
+import { formatAppDateTime, formatDateTimeLocalInput } from "../../date-time.js";
 import { escapeHtml } from "../html.js";
 import { platformBadge } from "./platform-meta.js";
 import { targetStatusBadge } from "./status-meta.js";
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
 export function formatDateTime(date: Date | null): string {
-  return date ? escapeHtml(date.toLocaleString("pl-PL")) : "brak";
+  return date ? escapeHtml(formatAppDateTime(date)) : "brak";
 }
 
 export function dateTimeLocalValue(date: Date | null): string {
-  if (!date) {
-    return "";
-  }
-
-  return [
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`,
-    `${pad(date.getHours())}:${pad(date.getMinutes())}`
-  ].join("T");
+  return formatDateTimeLocalInput(date);
 }
 
 export function accountLabel(account: SocialAccountRecord): string {

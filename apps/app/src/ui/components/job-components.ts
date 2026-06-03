@@ -1,10 +1,11 @@
 import type { PublishJobListItem, WorkerHeartbeatRecord } from "../../domain.js";
+import { formatAppDateTime } from "../../date-time.js";
 import { escapeHtml } from "../html.js";
 import { platformBadge } from "./platform-meta.js";
 import { jobStatusBadge, targetStatusBadge } from "./status-meta.js";
 
 function formatDate(date: Date | null): string {
-  return date ? escapeHtml(date.toLocaleString("pl-PL")) : "brak";
+  return date ? escapeHtml(formatAppDateTime(date)) : "brak";
 }
 
 function jobActions(job: PublishJobListItem): string {

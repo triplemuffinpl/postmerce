@@ -1,4 +1,5 @@
 import type { PostDetails, SocialAccountRecord } from "../../domain.js";
+import { formatAppDateTime } from "../../date-time.js";
 import { postMediaPreview, postStatusBadge, targetCards, targetStatusBadge } from "../components/post-components.js";
 import { platformBadge } from "../components/platform-meta.js";
 import { targetEditorForm } from "../components/target-control-components.js";
@@ -85,7 +86,7 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
             </div>
             <div class="detail-row">
               <span>Harmonogram</span>
-              <strong>${post.scheduledAt ? escapeHtml(post.scheduledAt.toLocaleString("pl-PL")) : `<span style="color:var(--muted); font-weight:500;">Brak (publikacja ręczna)</span>`}</strong>
+              <strong>${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt)) : `<span style="color:var(--muted); font-weight:500;">Brak (publikacja ręczna)</span>`}</strong>
             </div>
             <div class="detail-row">
               <span>Tagi bazowe</span>

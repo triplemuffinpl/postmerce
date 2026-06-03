@@ -1,3 +1,5 @@
+import { parseDateTimeLocal } from "../date-time.js";
+
 export type FormRecord = Record<string, string | string[] | undefined>;
 
 export function bodyToFormRecord(body: unknown): FormRecord {
@@ -46,6 +48,5 @@ export function optionalDateTimeLocal(value: string): Date | null {
     return null;
   }
 
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
+  return parseDateTimeLocal(value);
 }

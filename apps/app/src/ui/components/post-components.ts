@@ -1,4 +1,5 @@
 import type { MediaAssetRecord, PostListItem, PostTargetRecord } from "../../domain.js";
+import { formatAppDateTime } from "../../date-time.js";
 import { storagePathToPublicUrl } from "../../services/storage-service.js";
 import { escapeHtml } from "../html.js";
 import { platformBadge, platformLabel } from "./platform-meta.js";
@@ -51,7 +52,7 @@ export function postTable(posts: PostListItem[]): string {
         <td><strong style="font-size: 0.95rem;">${post.targetCount} cel(e)</strong></td>
         <td>
           <strong style="font-size:0.9rem;">
-            ${post.scheduledAt ? escapeHtml(post.scheduledAt.toLocaleString("pl-PL")) : `<span style="color:var(--muted); font-weight:500;">Brak harmonogramu</span>`}
+            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt)) : `<span style="color:var(--muted); font-weight:500;">Brak harmonogramu</span>`}
           </strong>
         </td>
       </tr>
@@ -77,7 +78,7 @@ export function postTable(posts: PostListItem[]): string {
         <div class="mobile-card-row" style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px;">
           <span>Harmonogram</span>
           <strong>
-            ${post.scheduledAt ? escapeHtml(post.scheduledAt.toLocaleString("pl-PL")) : `<span style="color:var(--muted); font-weight:500;">Brak</span>`}
+            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt)) : `<span style="color:var(--muted); font-weight:500;">Brak</span>`}
           </strong>
         </div>
       </article>
@@ -180,7 +181,7 @@ export function targetCards(targets: PostTargetRecord[]): string {
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                   <dt style="color: var(--muted); font-weight: 600;">Harmonogram</dt>
-                  <dd style="font-weight: 700;">${target.scheduledAt ? escapeHtml(target.scheduledAt.toLocaleString("pl-PL")) : "brak"}</dd>
+                  <dd style="font-weight: 700;">${target.scheduledAt ? escapeHtml(formatAppDateTime(target.scheduledAt)) : "brak"}</dd>
                 </div>
               </dl>
             </article>

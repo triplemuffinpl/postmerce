@@ -1,5 +1,6 @@
 import type { CalendarPageData } from "../../services/target-service.js";
 import type { TargetControlItem } from "../../db/target-repository.js";
+import { appDateTimeParts } from "../../date-time.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 import { formatDateTime } from "../components/target-control-components.js";
@@ -16,7 +17,8 @@ function messageBanner(type: "notice" | "error", message: string | undefined): s
 }
 
 function dayKey(date: Date): string {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+  const parts = appDateTimeParts(date);
+  return `${parts.year}-${String(parts.month).padStart(2, "0")}-${String(parts.day).padStart(2, "0")}`;
 }
 
 function targetDate(target: TargetControlItem): Date {
@@ -43,8 +45,8 @@ function targetCalendarLabel(target: TargetControlItem): string {
 
   const date = target.scheduledAt ?? target.postScheduledAt;
   if (date) {
-    const d = new Date(date);
-    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    const parts = appDateTimeParts(date);
+    return `${String(parts.hour).padStart(2, "0")}:${String(parts.minute).padStart(2, "0")}`;
   }
 
   const meta = targetStatusMeta[target.status];
@@ -96,10 +98,7 @@ function calendarGrid(options: CalendarPageOptions): string {
               const outside = date.getMonth() !== options.monthStart.getMonth();
               const hasIssues = dayTargets.some(t => t.status === "failed" || t.status === "requires_user_action");
               
-              const now = new Date();
-              const isToday = now.getDate() === date.getDate() && 
-                              now.getMonth() === date.getMonth() && 
-                              now.getFullYear() === date.getFullYear();
+              const isToday = dayKey(new Date()) === key;
 
               return `
                 <article class="calendar-day ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}">
