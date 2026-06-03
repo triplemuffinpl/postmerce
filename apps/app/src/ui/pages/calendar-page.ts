@@ -3,7 +3,8 @@ import type { TargetControlItem } from "../../db/target-repository.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 import { formatDateTime } from "../components/target-control-components.js";
-import { platformLabel, targetStatusBadge } from "../components/post-components.js";
+import { platformBadge } from "../components/platform-meta.js";
+import { targetStatusBadge } from "../components/status-meta.js";
 
 interface CalendarPageOptions extends CalendarPageData {
   notice?: string;
@@ -37,10 +38,16 @@ function calendarDays(monthStart: Date): Date[] {
 
 function targetCard(target: TargetControlItem): string {
   return `
-    <a class="calendar-target-card" href="/posts/${target.postId}">
-      <span>${escapeHtml(platformLabel(target.platform))}</span>
-      <strong>${escapeHtml(target.postTitle)}</strong>
-      ${targetStatusBadge(target.status)}
+    <a class="calendar-target-card platform-${target.platform}" href="/posts/${target.postId}" style="border-left: 3px solid var(--platform-${target.platform});">
+      <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+        ${platformBadge(target.platform, true)}
+      </div>
+      <strong style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(target.postTitle)}">
+        ${escapeHtml(target.postTitle)}
+      </strong>
+      <div style="margin-top: 4px;">
+        ${targetStatusBadge(target.status)}
+      </div>
     </a>
   `;
 }
@@ -56,29 +63,38 @@ function calendarGrid(options: CalendarPageOptions): string {
   }
 
   return `
-    <div class="calendar-weekdays">
-      ${["Pon", "Wt", "Sr", "Czw", "Pt", "Sob", "Nd"].map((label) => `<span>${label}</span>`).join("")}
-    </div>
-    <div class="calendar-grid">
-      ${calendarDays(options.monthStart)
-        .map((date) => {
-          const key = dayKey(date);
-          const dayTargets = targetsByDay.get(key) ?? [];
-          const outside = date.getMonth() !== options.monthStart.getMonth();
-          return `
-            <article class="calendar-day ${outside ? "is-outside" : ""}">
-              <div class="calendar-day-head">
-                <strong>${date.getDate()}</strong>
-                <span>${dayTargets.length} target</span>
-              </div>
-              <div class="calendar-day-items">
-                ${dayTargets.slice(0, 4).map(targetCard).join("")}
-                ${dayTargets.length > 4 ? `<span class="row-meta">+${dayTargets.length - 4} wiecej</span>` : ""}
-              </div>
-            </article>
-          `;
-        })
-        .join("")}
+    <div class="calendar-scroll-hint">Przesuń w bok ↔</div>
+    <div class="calendar-scroll-wrapper">
+      <div class="calendar-scroll-inner">
+        <div class="calendar-weekdays">
+          ${["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"].map((label) => `<span>${label}</span>`).join("")}
+        </div>
+        <div class="calendar-grid">
+          ${calendarDays(options.monthStart)
+            .map((date) => {
+              const key = dayKey(date);
+              const dayTargets = targetsByDay.get(key) ?? [];
+              const outside = date.getMonth() !== options.monthStart.getMonth();
+              const hasIssues = dayTargets.some(t => t.status === "failed" || t.status === "requires_user_action");
+              return `
+                <article class="calendar-day ${outside ? "is-outside" : ""}">
+                  <div class="calendar-day-head">
+                    <strong style="display: flex; align-items: center;">
+                      ${date.getDate()}
+                      ${hasIssues ? `<span class="day-alert-marker" title="Wykryto błędy lub wymagana akcja"></span>` : ""}
+                    </strong>
+                    <span>${dayTargets.length} cel(i)</span>
+                  </div>
+                  <div class="calendar-day-items">
+                    ${dayTargets.slice(0, 3).map(targetCard).join("")}
+                    ${dayTargets.length > 3 ? `<a href="/control" class="calendar-more-action">+${dayTargets.length - 3} więcej</a>` : ""}
+                  </div>
+                </article>
+              `;
+            })
+            .join("")}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -90,16 +106,21 @@ function agendaList(targets: TargetControlItem[]): string {
     .slice(0, 25);
 
   if (upcoming.length === 0) {
-    return `<section class="empty-state compact-empty"><h2>Brak targetow w kalendarzu</h2><p>Zaplanuj targety, aby zobaczyc je w osi czasu.</p></section>`;
+    return `<section class="empty-state compact-empty"><h2>Brak targetów w kalendarzu</h2><p>Zaplanuj targety, aby zobaczyć je w osi czasu.</p></section>`;
   }
 
   return `
     <div class="heartbeat-list">
       ${upcoming
         .map((target) => `
-          <article>
-            <strong>${escapeHtml(target.postTitle)}</strong>
-            <span>${escapeHtml(platformLabel(target.platform))} · ${formatDateTime(targetDate(target))}</span>
+          <article style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="display: block; font-size: 0.95rem;">${escapeHtml(target.postTitle)}</strong>
+              <span class="row-meta" style="display: flex; align-items: center; gap: 6px; margin-top: 4px;">
+                ${platformBadge(target.platform, true)}
+                <span>· ${formatDateTime(targetDate(target))}</span>
+              </span>
+            </div>
             <div>${targetStatusBadge(target.status)}</div>
           </article>
         `)
@@ -116,7 +137,7 @@ export function calendarPage(options: CalendarPageOptions): string {
       <section class="page-header compact">
         <p class="eyebrow">Plan publikacji</p>
         <h1 style="font-weight: 800; letter-spacing: -0.03em;">Kalendarz</h1>
-        <p class="lead">Widok miesieczny targetow publikacji. Tu najlatwiej zauwazyc luki, kumulacje i targety wymagajace reakcji.</p>
+        <p class="lead">Widok miesięczny targetów publikacji. Tu najłatwiej zauważyć luki, kumulacje i targety wymagające reakcji.</p>
       </section>
 
       ${messageBanner("notice", options.notice)}
@@ -127,9 +148,9 @@ export function calendarPage(options: CalendarPageOptions): string {
           <a class="button-link secondary" href="/calendar?month=${options.previousMonth}">Poprzedni</a>
           <div style="text-align: center;">
             <h2 style="margin: 0; text-transform: capitalize;">${escapeHtml(options.monthStart.toLocaleString("pl-PL", { month: "long", year: "numeric" }))}</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 600;">${options.targets.length} targetow w zakresie widoku</p>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 600;">${options.targets.length} targetów w zakresie widoku</p>
           </div>
-          <a class="button-link secondary" href="/calendar?month=${options.nextMonth}">Nastepny</a>
+          <a class="button-link secondary" href="/calendar?month=${options.nextMonth}">Następny</a>
         </div>
         ${calendarGrid(options)}
       </section>
@@ -137,8 +158,8 @@ export function calendarPage(options: CalendarPageOptions): string {
       <section class="panel">
         <div class="panel-header">
           <div>
-            <h2 style="margin: 0;">Najblizsza agenda</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Szybka lista targetow z miesiaca i sasiednich tygodni.</p>
+            <h2 style="margin: 0;">Najbliższa agenda</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Szybka lista targetów z miesiąca i sąsiednich tygodni.</p>
           </div>
           <a class="text-link" href="/control">Centrum kontroli</a>
         </div>

@@ -1,7 +1,8 @@
 import type { PostTargetRecord, SocialAccountRecord } from "../../domain.js";
 import type { TargetControlItem } from "../../db/target-repository.js";
 import { escapeHtml } from "../html.js";
-import { platformLabel, targetStatusBadge } from "./post-components.js";
+import { platformBadge } from "./platform-meta.js";
+import { targetStatusBadge } from "./status-meta.js";
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -38,7 +39,7 @@ export function accountSelectOptions(
   const matchingAccounts = accounts.filter((account) => account.platform === platform);
 
   return [
-    `<option value="" ${selectedAccountId === null ? "selected" : ""}>Auto / pierwsze polaczone konto</option>`,
+    `<option value="" ${selectedAccountId === null ? "selected" : ""}>Auto / pierwsze połączone konto</option>`,
     ...matchingAccounts.map((account) => {
       const selected = selectedAccountId === account.id ? "selected" : "";
       return `<option value="${account.id}" ${selected}>${escapeHtml(accountLabel(account))} (#${account.id})</option>`;
@@ -85,11 +86,11 @@ export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccou
       </div>
       <div class="form-grid two">
         <label>
-          <span>Tytul</span>
+          <span>Tytuł</span>
           <input name="platform_title" type="text" value="${escapeHtml(target.platformTitle ?? "")}" />
         </label>
         <label>
-          <span>Widocznosc</span>
+          <span>Widoczność</span>
           <select name="privacy">
             ${["default", "private", "unlisted", "public"]
               .map((value) => {
@@ -120,14 +121,146 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
   if (targets.length === 0) {
     return `
       <section class="empty-state">
-        <h2>Brak targetow</h2>
-        <p>Utworz pierwszy wpis i wybierz platformy, aby zobaczyc tu centrum publikacji.</p>
+        <h2>Brak targetów</h2>
+        <p>Utwórz pierwszy wpis i wybierz platformy, aby zobaczyć tu centrum publikacji.</p>
       </section>
     `;
   }
 
+  const rows = targets
+    .map((target) => `
+      <tr>
+        <td>
+          <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+            ${platformBadge(target.platform, true)}
+            <strong style="color: var(--primary); font-size: 0.85rem;">#${target.id}</strong>
+          </div>
+        </td>
+        <td>
+          <a class="row-title" href="/posts/${target.postId}">${escapeHtml(target.postTitle)}</a>
+          <span class="row-meta">Media: ${escapeHtml(target.mediaOriginalFilename ?? "brak")}</span>
+          ${
+            target.externalUrl
+              ? `<a class="text-link" href="${escapeHtml(target.externalUrl)}" target="_blank" rel="noreferrer">Otwórz publikację</a>`
+              : ""
+          }
+        </td>
+        <td>
+          <strong>${escapeHtml(targetAccountLabel(target))}</strong>
+          <span class="row-meta">${escapeHtml(target.accountStatus ?? "auto")}</span>
+        </td>
+        <td>
+          <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt)}</strong>
+          <span class="row-meta">Job: ${target.latestJobId ? `#${target.latestJobId}` : "brak"}</span>
+        </td>
+        <td>
+          ${targetStatusBadge(target.status)}
+          ${
+            target.errorMessage ?? target.latestJobLastError
+              ? `
+                <div class="error-block" style="margin-top: 8px;">
+                  <div class="error-block-title">
+                    <svg style="width: 12px; height: 12px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.126 2.914 21 4.645 21h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 17.626zM12 17.25h.007v.008H12v-.008z" />
+                    </svg>
+                    <span>Błąd publikacji</span>
+                  </div>
+                  <div class="error-block-text">
+                    ${escapeHtml(target.errorMessage ?? target.latestJobLastError ?? "Nieznany błąd")}
+                  </div>
+                </div>
+              `
+              : ""
+          }
+        </td>
+        <td>
+          ${targetActionForms(target, returnTo)}
+          <details style="margin-top: 10px;">
+            <summary class="text-link" style="cursor: pointer; font-weight: 700;">Edytuj</summary>
+            <div style="margin-top: 12px; max-width: 320px;">
+              ${targetEditorForm(target, accounts, returnTo)}
+            </div>
+          </details>
+        </td>
+      </tr>
+    `)
+    .join("");
+
+  const cards = targets
+    .map((target) => `
+      <article class="mobile-card">
+        <div class="mobile-card-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            ${platformBadge(target.platform, true)}
+            <strong style="color: var(--primary);">#${target.id}</strong>
+          </div>
+          ${targetStatusBadge(target.status)}
+        </div>
+        <div class="mobile-card-content">
+          <div class="mobile-card-row">
+            <span>Wpis</span>
+            <strong>
+              <a class="text-link" href="/posts/${target.postId}">${escapeHtml(target.postTitle)}</a>
+            </strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Media</span>
+            <strong style="font-size: 0.8rem; font-weight: 500;">${escapeHtml(target.mediaOriginalFilename ?? "brak")}</strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Konto</span>
+            <strong>${escapeHtml(targetAccountLabel(target))} <span class="row-meta">(${escapeHtml(target.accountStatus ?? "auto")})</span></strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Harmonogram</span>
+            <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt)}</strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Zlecenie (Job)</span>
+            <strong>${target.latestJobId ? `#${target.latestJobId}` : "brak"}</strong>
+          </div>
+          ${
+            target.externalUrl
+              ? `<div class="mobile-card-row">
+                   <span>Link</span>
+                   <strong><a class="text-link" href="${escapeHtml(target.externalUrl)}" target="_blank" rel="noreferrer">Otwórz publikację</a></strong>
+                 </div>`
+              : ""
+          }
+          ${
+            target.errorMessage ?? target.latestJobLastError
+              ? `
+                <div class="error-block">
+                  <div class="error-block-title">
+                    <svg style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.126 2.914 21 4.645 21h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 17.626zM12 17.25h.007v.008H12v-.008z" />
+                    </svg>
+                    <span>Błąd publikacji</span>
+                  </div>
+                  <div class="error-block-text">
+                    ${escapeHtml(target.errorMessage ?? target.latestJobLastError ?? "Nieznany błąd")}
+                  </div>
+                </div>
+              `
+              : ""
+          }
+        </div>
+        <div style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 10px;">
+          ${targetActionForms(target, returnTo)}
+          <details>
+            <summary class="text-link" style="cursor: pointer; font-weight: 700; font-size: 0.85rem; padding: 4px 0;">Edytuj target</summary>
+            <div style="margin-top: 10px;">
+              ${targetEditorForm(target, accounts, returnTo)}
+            </div>
+          </details>
+        </div>
+      </article>
+    `)
+    .join("");
+
   return `
-    <div class="table-wrap">
+    <!-- Desktop View -->
+    <div class="desktop-only table-wrap">
       <table class="media-table">
         <thead>
           <tr>
@@ -140,52 +273,14 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           </tr>
         </thead>
         <tbody>
-          ${targets
-            .map((target) => `
-              <tr>
-                <td>
-                  <strong style="color: var(--primary);">#${target.id}</strong>
-                  <span class="row-meta">${escapeHtml(platformLabel(target.platform))}</span>
-                </td>
-                <td>
-                  <a class="row-title" href="/posts/${target.postId}">${escapeHtml(target.postTitle)}</a>
-                  <span class="row-meta">Media: ${escapeHtml(target.mediaOriginalFilename ?? "brak")}</span>
-                  ${
-                    target.externalUrl
-                      ? `<a class="text-link" href="${escapeHtml(target.externalUrl)}" target="_blank" rel="noreferrer">Otworz publikacje</a>`
-                      : ""
-                  }
-                </td>
-                <td>
-                  <strong>${escapeHtml(targetAccountLabel(target))}</strong>
-                  <span class="row-meta">${escapeHtml(target.accountStatus ?? "auto")}</span>
-                </td>
-                <td>
-                  <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt)}</strong>
-                  <span class="row-meta">Job: ${target.latestJobId ? `#${target.latestJobId}` : "brak"}</span>
-                </td>
-                <td>
-                  ${targetStatusBadge(target.status)}
-                  ${
-                    target.errorMessage ?? target.latestJobLastError
-                      ? `<span class="row-meta" style="color: var(--danger); display:block; max-width: 260px;">${escapeHtml(target.errorMessage ?? target.latestJobLastError ?? "")}</span>`
-                      : ""
-                  }
-                </td>
-                <td>
-                  ${targetActionForms(target, returnTo)}
-                  <details style="margin-top: 10px;">
-                    <summary class="text-link" style="cursor: pointer; font-weight: 700;">Edytuj</summary>
-                    <div style="margin-top: 12px; min-width: 360px;">
-                      ${targetEditorForm(target, accounts, returnTo)}
-                    </div>
-                  </details>
-                </td>
-              </tr>
-            `)
-            .join("")}
+          ${rows}
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile View -->
+    <div class="mobile-only mobile-cards-list">
+      ${cards}
     </div>
   `;
 }

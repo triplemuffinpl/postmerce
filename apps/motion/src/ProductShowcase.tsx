@@ -194,9 +194,9 @@ export const ProductShowcase = () => {
 };
 
 const rootStyle: CSSProperties = {
-  background: "linear-gradient(135deg, #f8fbff 0%, #eef3ff 48%, #f5fff8 100%)",
-  color: "#111827",
-  fontFamily: "Aptos, Segoe UI, system-ui, sans-serif",
+  background: "linear-gradient(135deg, #f8fafc 0%, #f1f5f9 48%, #f5f3ff 100%)",
+  color: "#0f172a",
+  fontFamily: "'Outfit', 'Inter', system-ui, sans-serif",
   overflow: "hidden"
 };
 

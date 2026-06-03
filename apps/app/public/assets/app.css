@@ -26,6 +26,18 @@
   --danger: #f43f5e;
   --danger-soft: #fff1f2;
 
+  /* Platform colors */
+  --platform-youtube: #ef4444;
+  --platform-youtube-soft: #fee2e2;
+  --platform-linkedin: #0a66c2;
+  --platform-linkedin-soft: #dbeafe;
+  --platform-instagram: #e1306c;
+  --platform-instagram-soft: #fce7f3;
+  --platform-facebook: #1877f2;
+  --platform-facebook-soft: #dbeafe;
+  --platform-tiktok: #111827;
+  --platform-tiktok-soft: #e5e7eb;
+
   --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   
   --radius-lg: 18px;
@@ -52,6 +64,13 @@
   --success-soft: rgba(16, 185, 129, 0.12);
   --warning-soft: rgba(245, 158, 11, 0.12);
   --danger-soft: rgba(244, 63, 94, 0.12);
+
+  --platform-youtube-soft: rgba(239, 68, 68, 0.15);
+  --platform-linkedin-soft: rgba(10, 102, 194, 0.15);
+  --platform-instagram-soft: rgba(225, 48, 108, 0.15);
+  --platform-facebook-soft: rgba(24, 119, 242, 0.15);
+  --platform-tiktok: #f4f4f5;
+  --platform-tiktok-soft: rgba(244, 244, 245, 0.15);
 
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.25);
@@ -868,7 +887,59 @@ p {
   font-weight: 600;
 }
 
+/* Platform Badges */
+.platform-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.platform-badge.compact {
+  padding: 4px;
+}
+.platform-badge svg {
+  flex-shrink: 0;
+  display: block;
+}
+.platform-badge.platform-youtube {
+  background: var(--platform-youtube-soft);
+  color: var(--platform-youtube);
+  border-color: rgba(239, 68, 68, 0.15);
+}
+.platform-badge.platform-linkedin {
+  background: var(--platform-linkedin-soft);
+  color: var(--platform-linkedin);
+  border-color: rgba(10, 102, 194, 0.15);
+}
+.platform-badge.platform-instagram {
+  background: var(--platform-instagram-soft);
+  color: var(--platform-instagram);
+  border-color: rgba(225, 48, 108, 0.15);
+}
+.platform-badge.platform-facebook {
+  background: var(--platform-facebook-soft);
+  color: var(--platform-facebook);
+  border-color: rgba(24, 119, 242, 0.15);
+}
+.platform-badge.platform-tiktok {
+  background: var(--platform-tiktok-soft);
+  color: var(--platform-tiktok);
+  border-color: rgba(17, 24, 39, 0.15);
+}
+.dark-theme .platform-badge.platform-tiktok {
+  border-color: rgba(244, 244, 245, 0.15);
+}
+
+/* Status Badges */
 .status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
@@ -876,19 +947,266 @@ p {
   white-space: nowrap;
 }
 
-.status-ok {
+/* Status Colors & Animations */
+.status-gray {
+  background: var(--line);
+  color: var(--muted);
+}
+.status-blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+}
+.status-purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: #8b5cf6;
+}
+.status-orange {
+  background: rgba(249, 115, 22, 0.12);
+  color: #f97316;
+}
+.status-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+.status-red {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.status-green {
   background: var(--success-soft);
   color: var(--success);
 }
-
-.status-muted {
-  background: var(--primary-soft);
-  color: var(--primary);
+.status-cyan {
+  background: rgba(6, 182, 212, 0.12);
+  color: #06b6d4;
+}
+.status-slate {
+  background: rgba(100, 116, 139, 0.12);
+  color: #64748b;
 }
 
-.status-danger {
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.62; }
+}
+.status-pulse {
+  animation: badge-pulse 2s infinite ease-in-out;
+}
+
+/* Loader dot inside the badge */
+.status-badge.has-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-badge.has-loader::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: badge-pulse 1.2s infinite ease-in-out;
+}
+
+/* Error Block styling */
+.error-block {
   background: var(--danger-soft);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  max-width: 100%;
+  text-align: left;
+}
+.error-block-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: var(--danger);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.error-block-title svg {
+  flex-shrink: 0;
+}
+.error-block-text {
+  font-size: 0.8rem;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+/* Distinct Action Buttons styling */
+.inline-actions {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+/* queue now: primary/accent colored background on hover */
+.inline-actions form button.inline-action {
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  border: 1px solid hsl(var(--primary-hue), var(--primary-saturation), 85%) !important;
+}
+.inline-actions form button.inline-action:hover {
+  background: var(--primary) !important;
+  color: #fff !important;
+  border-color: var(--primary) !important;
+}
+/* Duplicate button: neutral secondary outline */
+.inline-actions form + form button.inline-action {
+  background: var(--panel) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
+}
+.inline-actions form + form button.inline-action:hover {
+  background: var(--panel-hover) !important;
+  border-color: var(--muted) !important;
+}
+/* Cancel button: red / danger outline */
+.inline-actions form button.inline-action.danger {
+  background: var(--danger-soft) !important;
+  color: var(--danger) !important;
+  border: 1px solid rgba(244, 63, 94, 0.2) !important;
+}
+.inline-actions form button.inline-action.danger:hover {
+  background: var(--danger) !important;
+  color: #fff !important;
+  border-color: var(--danger) !important;
+}
+
+/* Desktop vs Mobile layouts helper styles */
+.mobile-only {
+  display: none !important;
+}
+.desktop-only {
+  display: block;
+}
+
+/* Scrollable calendar view on mobile */
+.calendar-scroll-wrapper {
+  width: 100%;
+}
+.calendar-scroll-hint {
+  display: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: right;
+  margin-bottom: 8px;
+}
+.day-alert-marker {
+  width: 8px;
+  height: 8px;
+  background-color: var(--danger);
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 6px;
+  box-shadow: 0 0 0 2px var(--panel);
+}
+.calendar-more-action {
+  display: block;
+  text-align: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: var(--transition);
+  margin-top: 4px;
+}
+.calendar-more-action:hover {
+  background: var(--primary);
+  color: #ffffff;
+}
+
+@media (max-width: 900px) {
+  .mobile-only {
+    display: block !important;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Responsive card structures on mobile */
+  .mobile-cards-list {
+    display: grid;
+    gap: 16px;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .mobile-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 10px;
+    gap: 8px;
+  }
+
+  .mobile-card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    gap: 10px;
+  }
+
+  .mobile-card-row span {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .mobile-card-row strong {
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .mobile-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* Allow calendar grids to scroll horizontally on mobile */
+  .calendar-scroll-hint {
+    display: block;
+  }
+  .calendar-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -16px;
+    padding: 0 16px;
+  }
+  .calendar-scroll-inner {
+    min-width: 840px; /* Keep it from squeezing, keep grid structure */
+  }
+  .calendar-weekdays {
+    display: grid !important; /* Keep columns visible on mobile in scroll */
+  }
+  .calendar-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  }
 }
 
 /* Social platforms lists */

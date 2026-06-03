@@ -113,8 +113,8 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
       <section class="panel" style="margin-bottom: 32px;">
         <div class="panel-header" style="margin-bottom: 24px;">
           <div style="display: grid; gap: 4px;">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Edycja i akcje targetow</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Zmien konto, harmonogram, opis albo od razu kolejkuj wybrany target.</p>
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Edycja i akcje targetów</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Zmień konto, harmonogram, opis albo od razu kolejkuj wybrany target.</p>
           </div>
           <a class="text-link" href="/control">Centrum kontroli</a>
         </div>

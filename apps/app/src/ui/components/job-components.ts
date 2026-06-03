@@ -1,28 +1,10 @@
-import type { PublishJobListItem, PublishJobStatus, WorkerHeartbeatRecord } from "../../domain.js";
-import { classNames, escapeHtml } from "../html.js";
-import { platformLabel, targetStatusBadge } from "./post-components.js";
-
-const jobStatusLabels: Record<PublishJobStatus, string> = {
-  pending: "Oczekujące",
-  running: "W toku",
-  succeeded: "Ukończone",
-  failed: "Błąd",
-  cancelled: "Anulowane"
-};
+import type { PublishJobListItem, WorkerHeartbeatRecord } from "../../domain.js";
+import { escapeHtml } from "../html.js";
+import { platformBadge } from "./platform-meta.js";
+import { jobStatusBadge, targetStatusBadge } from "./status-meta.js";
 
 function formatDate(date: Date | null): string {
   return date ? escapeHtml(date.toLocaleString("pl-PL")) : "brak";
-}
-
-function jobStatusBadge(status: PublishJobStatus): string {
-  const className = classNames([
-    "status-badge",
-    status === "succeeded" && "status-ok",
-    (status === "failed" || status === "cancelled") && "status-danger",
-    status !== "succeeded" && status !== "failed" && status !== "cancelled" && "status-muted"
-  ]);
-
-  return `<span class="${className}">${jobStatusLabels[status]}</span>`;
 }
 
 function jobActions(job: PublishJobListItem): string {
@@ -73,8 +55,132 @@ export function jobsTable(jobs: PublishJobListItem[]): string {
     `;
   }
 
+  const rows = jobs
+    .map((job) => `
+      <tr>
+        <td>
+          <strong style="color: var(--primary); font-size: 1.05rem;">#${job.id}</strong>
+          <span class="row-meta" style="font-weight:600;">${escapeHtml(job.jobType)} · próby ${job.attempts}/${job.maxAttempts}</span>
+        </td>
+        <td>
+          ${
+            job.postId && job.postTitle
+              ? `<a class="row-title" style="font-weight: 700;" href="/posts/${job.postId}">${escapeHtml(job.postTitle)}</a>`
+              : `<span class="row-title" style="color: var(--muted);">Brak wpisu</span>`
+          }
+          <span class="row-meta" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+            ${job.platform ? platformBadge(job.platform, true) : "Brak platformy"}
+            ${job.targetStatus ? ` · ${targetStatusBadge(job.targetStatus)}` : ""}
+          </span>
+          <span class="row-meta" style="font-size: 0.8rem; margin-top: 4px;">Plik: ${escapeHtml(job.mediaOriginalFilename ?? "Brak")}</span>
+        </td>
+        <td>${jobStatusBadge(job.status)}</td>
+        <td>
+          <span class="row-meta" style="font-weight: 600;">Uruchom po:</span>
+          <strong style="font-size: 0.9rem;">${formatDate(job.runAfter)}</strong>
+          ${
+            job.lockedBy
+              ? `<span class="row-meta" style="background: var(--warning-soft); color: var(--warning); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; font-weight: 600;">Zablokowane przez: ${escapeHtml(job.lockedBy)}</span>`
+              : ""
+          }
+        </td>
+        <td>
+          ${
+            job.lastError 
+              ? `
+                <div class="error-block">
+                  <div class="error-block-title">
+                    <svg style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.126 2.914 21 4.645 21h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 17.626zM12 17.25h.007v.008H12v-.008z" />
+                    </svg>
+                    <span>${escapeHtml(job.errorClass ?? "Nieznany")}</span>
+                  </div>
+                  <div class="error-block-text" title="${escapeHtml(job.lastError)}">
+                    ${escapeHtml(job.lastError)}
+                  </div>
+                </div>
+              `
+              : `<span style="color: var(--muted); font-size: 0.85rem; font-weight: 500;">Brak błędów</span>`
+          }
+        </td>
+        <td>${jobActions(job)}</td>
+      </tr>
+    `)
+    .join("");
+
+  const cards = jobs
+    .map((job) => `
+      <article class="mobile-card">
+        <div class="mobile-card-header">
+          <strong style="color: var(--primary); font-size: 1.05rem;">Zadanie #${job.id}</strong>
+          ${jobStatusBadge(job.status)}
+        </div>
+        <div class="mobile-card-content">
+          <div class="mobile-card-row">
+            <span>Typ</span>
+            <strong>${escapeHtml(job.jobType)} (próby ${job.attempts}/${job.maxAttempts})</strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Wpis</span>
+            <strong>
+              ${
+                job.postId && job.postTitle
+                  ? `<a class="text-link" href="/posts/${job.postId}">${escapeHtml(job.postTitle)}</a>`
+                  : `<span style="color: var(--muted);">Brak wpisu</span>`
+              }
+            </strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Platforma</span>
+            <strong>
+              ${job.platform ? platformBadge(job.platform, true) : "Brak"}
+              ${job.targetStatus ? ` · ${targetStatusBadge(job.targetStatus)}` : ""}
+            </strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Plik</span>
+            <strong style="word-break: break-all; font-size: 0.8rem; font-weight: 500;">${escapeHtml(job.mediaOriginalFilename ?? "Brak")}</strong>
+          </div>
+          <div class="mobile-card-row">
+            <span>Uruchom po</span>
+            <strong>${formatDate(job.runAfter)}</strong>
+          </div>
+          ${
+            job.lockedBy
+              ? `<div class="mobile-card-row" style="background: var(--warning-soft); padding: 6px; border-radius: var(--radius-sm);">
+                   <span>Blokada</span>
+                   <strong style="color: var(--warning);">${escapeHtml(job.lockedBy)}</strong>
+                 </div>`
+              : ""
+          }
+          ${
+            job.lastError 
+              ? `
+                <div class="error-block">
+                  <div class="error-block-title">
+                    <svg style="width: 14px; height: 14px;" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376C1.83 19.126 2.914 21 4.645 21h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 17.626zM12 17.25h.007v.008H12v-.008z" />
+                    </svg>
+                    <span>${escapeHtml(job.errorClass ?? "Nieznany")}</span>
+                  </div>
+                  <div class="error-block-text">
+                    ${escapeHtml(job.lastError)}
+                  </div>
+                </div>
+              `
+              : ""
+          }
+        </div>
+        <div style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; display: flex; justify-content: flex-end;">
+          ${jobActions(job)}
+        </div>
+      </article>
+    `)
+    .join("");
+
   return `
-    <div class="table-wrap">
+    <!-- Desktop View -->
+    <div class="desktop-only table-wrap">
       <table class="media-table jobs-table">
         <thead>
           <tr>
@@ -87,49 +193,14 @@ export function jobsTable(jobs: PublishJobListItem[]): string {
           </tr>
         </thead>
         <tbody>
-          ${jobs
-            .map((job) => `
-              <tr>
-                <td>
-                  <strong style="color: var(--primary); font-size: 1.05rem;">#${job.id}</strong>
-                  <span class="row-meta" style="font-weight:600;">${escapeHtml(job.jobType)} · próby ${job.attempts}/${job.maxAttempts}</span>
-                </td>
-                <td>
-                  ${
-                    job.postId && job.postTitle
-                      ? `<a class="row-title" style="font-weight: 700;" href="/posts/${job.postId}">${escapeHtml(job.postTitle)}</a>`
-                      : `<span class="row-title" style="color: var(--muted);">Brak wpisu</span>`
-                  }
-                  <span class="row-meta" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                    ${job.platform ? `<span style="font-weight:600;">${escapeHtml(platformLabel(job.platform))}</span>` : "Brak platformy"}
-                    ${job.targetStatus ? ` · ${targetStatusBadge(job.targetStatus)}` : ""}
-                  </span>
-                  <span class="row-meta" style="font-size: 0.8rem; margin-top: 4px;">Plik: ${escapeHtml(job.mediaOriginalFilename ?? "Brak")}</span>
-                </td>
-                <td>${jobStatusBadge(job.status)}</td>
-                <td>
-                  <span class="row-meta" style="font-weight: 600;">Uruchom po:</span>
-                  <strong style="font-size: 0.9rem;">${formatDate(job.runAfter)}</strong>
-                  ${
-                    job.lockedBy
-                      ? `<span class="row-meta" style="background: var(--warning-soft); color: var(--warning); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; font-weight: 600;">Zablokowane przez: ${escapeHtml(job.lockedBy)}</span>`
-                      : ""
-                  }
-                </td>
-                <td>
-                  ${
-                    job.lastError 
-                      ? `<span class="row-meta" style="color: var(--danger); font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">${escapeHtml(job.errorClass ?? "Nieznany")}</span>
-                         <strong style="color: var(--danger); font-size: 0.85rem; font-weight: 500; display: block; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(job.lastError)}">${escapeHtml(job.lastError)}</strong>`
-                      : `<span style="color: var(--muted); font-size: 0.85rem; font-weight: 500;">Brak błędów</span>`
-                  }
-                </td>
-                <td>${jobActions(job)}</td>
-              </tr>
-            `)
-            .join("")}
+          ${rows}
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile View -->
+    <div class="mobile-only mobile-cards-list">
+      ${cards}
     </div>
   `;
 }
