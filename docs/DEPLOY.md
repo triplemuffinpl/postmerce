@@ -66,11 +66,14 @@ Use proxy-level Basic Auth for the private panel until SaaS auth exists. Keep
 `/oauth/*` reachable without Basic Auth because platform OAuth callbacks return
 through the user's browser and are protected by signed `state`.
 
-The current second VPS firewall allows public HTTPS only from Cloudflare IP
-ranges. With the current Caddy internal certificate setup, the Cloudflare DNS
-record for `staging.postmerce.pl` should be proxied and Cloudflare SSL/TLS mode
-should be `Full`, not `Flexible`. Use `Full (strict)` only after adding a
-Cloudflare Origin Certificate or DNS-challenge certificate automation.
+The current second VPS firewall allows public HTTP and HTTPS only from
+Cloudflare IP ranges. Port `80` is open for Cloudflare so plain
+`http://postmerce.pl` can reach Caddy and redirect to HTTPS instead of timing
+out at the Cloudflare edge. With the current Caddy internal certificate setup,
+the Cloudflare DNS record for `staging.postmerce.pl` should be proxied and
+Cloudflare SSL/TLS mode should be `Full`, not `Flexible`. Use `Full (strict)`
+only after adding a Cloudflare Origin Certificate or DNS-challenge certificate
+automation.
 
 Cloudflare DNS records for the second VPS:
 
