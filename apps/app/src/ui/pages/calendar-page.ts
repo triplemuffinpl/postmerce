@@ -3,8 +3,8 @@ import type { TargetControlItem } from "../../db/target-repository.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 import { formatDateTime } from "../components/target-control-components.js";
-import { platformBadge } from "../components/platform-meta.js";
-import { targetStatusBadge } from "../components/status-meta.js";
+import { platformIcon, platformLabel, platformBadge } from "../components/platform-meta.js";
+import { targetStatusMeta, targetStatusBadge } from "../components/status-meta.js";
 
 interface CalendarPageOptions extends CalendarPageData {
   notice?: string;
@@ -36,18 +36,20 @@ function calendarDays(monthStart: Date): Date[] {
   });
 }
 
-function targetCard(target: TargetControlItem): string {
+function targetPill(target: TargetControlItem): string {
+  const meta = targetStatusMeta[target.status];
+  const colorClass = meta ? meta.colorClass : "status-gray";
+  const title = escapeHtml(target.postTitle);
+  const platformName = platformLabel(target.platform);
+  const statusLabel = meta ? meta.label : target.status;
+
   return `
-    <a class="calendar-target-card platform-${target.platform}" href="/posts/${target.postId}" style="border-left: 3px solid var(--platform-${target.platform});">
-      <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-        ${platformBadge(target.platform, true)}
-      </div>
-      <strong style="display: block; font-size: 0.8rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(target.postTitle)}">
-        ${escapeHtml(target.postTitle)}
-      </strong>
-      <div style="margin-top: 4px;">
-        ${targetStatusBadge(target.status)}
-      </div>
+    <a class="calendar-target-pill platform-${target.platform} status-${target.status}" 
+       href="/posts/${target.postId}" 
+       title="${title} (${platformName} - ${statusLabel})">
+      <span class="platform-dot-icon">${platformIcon(target.platform, 12, 12)}</span>
+      <span class="target-title">${title}</span>
+      <span class="status-dot-indicator ${colorClass}"></span>
     </a>
   `;
 }
@@ -76,18 +78,24 @@ function calendarGrid(options: CalendarPageOptions): string {
               const dayTargets = targetsByDay.get(key) ?? [];
               const outside = date.getMonth() !== options.monthStart.getMonth();
               const hasIssues = dayTargets.some(t => t.status === "failed" || t.status === "requires_user_action");
+              
+              const now = new Date();
+              const isToday = now.getDate() === date.getDate() && 
+                              now.getMonth() === date.getMonth() && 
+                              now.getFullYear() === date.getFullYear();
+
               return `
-                <article class="calendar-day ${outside ? "is-outside" : ""}">
+                <article class="calendar-day ${outside ? "is-outside" : ""} ${isToday ? "is-today" : ""}">
                   <div class="calendar-day-head">
-                    <strong style="display: flex; align-items: center;">
+                    <strong class="calendar-day-number">
                       ${date.getDate()}
                       ${hasIssues ? `<span class="day-alert-marker" title="Wykryto błędy lub wymagana akcja"></span>` : ""}
                     </strong>
-                    <span>${dayTargets.length} cel(i)</span>
+                    ${dayTargets.length > 0 ? `<span class="calendar-day-count">${dayTargets.length}</span>` : ""}
                   </div>
                   <div class="calendar-day-items">
-                    ${dayTargets.slice(0, 3).map(targetCard).join("")}
-                    ${dayTargets.length > 3 ? `<a href="/control" class="calendar-more-action">+${dayTargets.length - 3} więcej</a>` : ""}
+                    ${dayTargets.slice(0, 4).map(targetPill).join("")}
+                    ${dayTargets.length > 4 ? `<a href="/control" class="calendar-more-action">+${dayTargets.length - 4} więcej</a>` : ""}
                   </div>
                 </article>
               `;
