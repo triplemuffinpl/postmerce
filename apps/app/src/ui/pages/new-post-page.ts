@@ -92,26 +92,42 @@ function accountHint(accounts: SocialAccountRecord[], platform: PlatformConfig):
 }
 
 function platformFields(platforms: PlatformConfig[], accounts: SocialAccountRecord[]): string {
-  return platforms
+  const platformTiles = platforms
     .map((platform) => {
       const disabled = platform.enabled ? "" : "disabled";
       const platformId = platform.platform;
       const connectedCount = accounts.filter((account) => account.platform === platform.platform).length;
+      const statusLabel = platform.enabled ? `${connectedCount} kont` : "Wyłączona";
 
       return `
-        <article class="platform-editor platform-selector ${platform.enabled ? "" : "is-disabled"}" data-platform-editor="${platformId}">
-          <label class="target-toggle platform-selector-head">
-            <input type="checkbox" name="platforms" value="${platformId}" ${disabled} onchange="togglePlatformEditor('${platformId}', this.checked)" />
-            <span class="platform-selector-identity">
+        <label class="platform-icon-tile ${platform.enabled ? "" : "is-disabled"}" data-platform-tile="${platformId}">
+          <input class="platform-icon-input" type="checkbox" name="platforms" value="${platformId}" ${disabled} onchange="togglePlatformEditor('${platformId}', this.checked)" />
+          <span class="platform-icon-symbol">${platformBadge(platform.platform, true)}</span>
+          <span class="platform-icon-label">${escapeHtml(platform.label)}</span>
+          <small>${escapeHtml(statusLabel)}</small>
+        </label>
+      `;
+    })
+    .join("");
+
+  const platformPanels = platforms
+    .map((platform) => {
+      const disabled = platform.enabled ? "" : "disabled";
+      const platformId = platform.platform;
+
+      return `
+        <article class="platform-detail-panel" data-platform-body="${platformId}" hidden>
+          <div class="platform-detail-head">
+            <div class="platform-selector-identity">
               ${platformBadge(platform.platform)}
               <span class="platform-selector-copy">
                 <strong>${escapeHtml(platform.label)}</strong>
-                <small>${platform.enabled ? `${connectedCount} połączonych kont` : "Integracja wyłączona"}</small>
+                <small>Ustaw konto, typ publikacji i opcjonalne nadpisania.</small>
               </span>
-            </span>
-            <span class="platform-selector-state">${platform.enabled ? "Wybierz" : "Niedostępna"}</span>
-          </label>
-          <div class="platform-selector-body" data-platform-body="${platformId}" hidden>
+            </div>
+            <span class="status-badge status-blue">Wybrana</span>
+          </div>
+          <div class="platform-selector-body">
             <div class="form-grid two">
               <label>
                 <span>Konto publikujące</span>
@@ -167,6 +183,15 @@ function platformFields(platforms: PlatformConfig[], accounts: SocialAccountReco
       `;
     })
     .join("");
+
+  return `
+    <div class="platform-icon-grid">
+      ${platformTiles}
+    </div>
+    <div class="platform-detail-stack">
+      ${platformPanels}
+    </div>
+  `;
 }
 
 export function newPostPage(options: NewPostPageOptions): string {
@@ -232,7 +257,7 @@ export function newPostPage(options: NewPostPageOptions): string {
         <section class="panel">
           <div style="margin-bottom: 20px;">
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">3. Kanały dystrybucji</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Wybierz platformy. Dopiero wtedy pokażą się ustawienia konta i opcjonalne nadpisania.</p>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Kliknij ikonę platformy. Dopiero po zaznaczeniu pokażą się ustawienia konta i opcjonalne nadpisania.</p>
           </div>
           <div class="platform-editor-grid">
             ${platformFields(options.platforms, options.accounts)}
@@ -268,13 +293,11 @@ export function newPostPage(options: NewPostPageOptions): string {
         })();
 
         function togglePlatformEditor(platform, checked) {
-          const editor = document.querySelector('[data-platform-editor="' + platform + '"]');
+          const editor = document.querySelector('[data-platform-tile="' + platform + '"]');
           const body = document.querySelector('[data-platform-body="' + platform + '"]');
           if (!editor || !body) return;
           editor.classList.toggle('is-selected', checked);
           body.hidden = !checked;
-          const state = editor.querySelector('.platform-selector-state');
-          if (state) state.textContent = checked ? 'Wybrana' : 'Wybierz';
         }
       </script>
     `
