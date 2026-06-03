@@ -9,6 +9,10 @@ Postmerce is the private publishing product for Wojtek. It may become a SaaS lat
 3. `docs/ROADMAP.md`
 4. The local file or module related to the current task
 
+For platform account, OAuth, API access or review work, also read:
+
+5. `docs/PLATFORM_ONBOARDING_PL.md`
+
 Do not load the whole repository by default. Avoid `node_modules`, `dist`, `.astro`, storage folders and generated outputs unless the task requires them.
 
 ## Product Direction

@@ -30,6 +30,13 @@ docs/         architecture, operations and API notes
 scripts/      local/deploy helper scripts
 ```
 
+## Platform Onboarding
+
+The detailed Polish checklist for Triple Muffin social accounts, developer
+applications, OAuth, reviews and Postmerce connection is in:
+
+[docs/PLATFORM_ONBOARDING_PL.md](docs/PLATFORM_ONBOARDING_PL.md)
+
 ## First Local Run
 
 ```powershell
