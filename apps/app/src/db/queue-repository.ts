@@ -794,7 +794,7 @@ export async function listWorkerHeartbeats(limit = 10): Promise<WorkerHeartbeatR
     `
       select *
       from worker_heartbeats
-      where last_seen_at >= now() - interval '2 minutes'
+      where last_seen_at >= now() - interval '20 seconds'
       order by last_seen_at desc
       limit $1
     `,
