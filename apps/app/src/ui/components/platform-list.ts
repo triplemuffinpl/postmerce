@@ -1,6 +1,7 @@
 import type { PlatformConfig, SocialAccountRecord } from "../../domain.js";
 import { escapeHtml } from "../html.js";
-import { platformIcon, platformLabel } from "./platform-meta.js";
+import { platformIcon, platformLabel, platformToneClass } from "./platform-meta.js";
+import { accountStatusBadge } from "./status-meta.js";
 
 interface PlatformListOptions {
   platforms: PlatformConfig[];
@@ -14,10 +15,16 @@ function accountSummary(accounts: SocialAccountRecord[]): string {
     return "Brak połączonego konta";
   }
 
-  return accounts
-    .map((account) => account.displayName ?? account.username ?? account.platformUserId ?? `Konto #${account.id}`)
-    .map(escapeHtml)
-    .join(", ");
+  return `
+    <span class="account-summary-list">
+      ${accounts
+        .map((account) => {
+          const label = account.displayName ?? account.username ?? account.platformUserId ?? `Konto #${account.id}`;
+          return `<span class="account-summary-item"><span>${escapeHtml(label)}</span>${accountStatusBadge(account.status)}</span>`;
+        })
+        .join("")}
+    </span>
+  `;
 }
 
 function platformAction(
@@ -64,7 +71,7 @@ export function platformList(options: PlatformListOptions): string {
           return `
             <article class="platform-row">
               <div style="display: flex; align-items: center; gap: 14px;">
-                <div class="platform-icon-wrap" style="background: var(--bg); padding: 8px; border-radius: var(--radius-sm); display: grid; place-items: center;">
+                <div class="platform-icon-wrap ${platformToneClass(platform.platform)}">
                   ${icon}
                 </div>
                 <div>
@@ -74,7 +81,7 @@ export function platformList(options: PlatformListOptions): string {
                   </p>
                   ${
                     showConnectionDetails
-                      ? `<p style="margin-top: 4px; font-size: 0.78rem; color: var(--muted); font-weight: 600;">${accountSummary(connectedAccounts)}</p>`
+                      ? `<p style="margin-top: 4px; font-size: 0.78rem; color: var(--muted); font-weight: 600;">${accountSummary(accounts)}</p>`
                       : ""
                   }
                 </div>

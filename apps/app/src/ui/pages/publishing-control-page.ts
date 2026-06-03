@@ -40,14 +40,14 @@ export function publishingControlPage(options: PublishingControlPageOptions): st
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Publish control center</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Kontrola publikacji</h1>
-        <p class="lead">Jedno miejsce do sprawdzania targetow, kont, statusow, bledow i szybkich akcji na kolejce.</p>
+        <h1 style="font-weight: 800;">Kontrola publikacji</h1>
+        <p class="lead">Jedno miejsce do sprawdzania targetów, kont, statusów, błędów i szybkich akcji na kolejce.</p>
       </section>
 
       ${messageBanner("notice", options.notice)}
       ${messageBanner("error", options.error)}
 
-      <section class="metric-grid" aria-label="Metryki targetow publikacji">
+      <section class="metric-grid" aria-label="Metryki targetów publikacji">
         ${metricCard("Wszystkie targety", options.metrics.total)}
         ${metricCard("W kolejce", options.metrics.queued, "ok")}
         ${metricCard("Problemy", options.metrics.failed + options.metrics.requiresAction, "danger")}

@@ -59,7 +59,7 @@ export function mediaDetailsPage(options: MediaDetailsPageOptions): string {
 
       <section class="page-header compact">
         <p class="eyebrow">Zasób wideo #${media.id}</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em; word-break: break-all;">${escapeHtml(media.originalFilename)}</h1>
+        <h1 style="font-weight: 800; word-break: break-all;">${escapeHtml(media.originalFilename)}</h1>
         <p class="lead">Plik jest przechowywany w lokalnej pamięci serwera i został pomyślnie zanalizowany.</p>
       </section>
 

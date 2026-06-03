@@ -13,7 +13,7 @@ export function dashboardPage(options: DashboardPageOptions): string {
     body: `
       <section class="page-header">
         <p class="eyebrow">Centrum publikacji</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Witaj w Postmerce</h1>
+        <h1 style="font-weight: 800;">Witaj w Postmerce</h1>
         <p class="lead">
           Przygotuj jeden materiał, rozbij go na platformowe targety i kontroluj
           każde wyjście z poziomu jednego panelu: konto, opis, termin, kolejkę i status.

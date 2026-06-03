@@ -13,34 +13,49 @@ if ($KeyPath) {
 }
 
 Write-Host "Building marketing website..."
-# Run local build
-& npm run build -w @postmerce/marketing
-if ($LASTEXITCODE -ne 0) {
-  throw "Failed to build @postmerce/marketing"
+Push-Location $repoRoot
+try {
+  & npm run build -w @postmerce/marketing
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to build @postmerce/marketing"
+  }
+} finally {
+  Pop-Location
 }
 
 Write-Host "Packaging build output..."
 $distDir = Join-Path $repoRoot "apps\marketing\dist"
-$archive = Join-Path ([System.IO.Path]::GetTempPath()) "marketing.tar.gz"
-$remoteArchive = "/tmp/marketing.tar.gz"
+$archiveName = "postmerce-marketing-$([Guid]::NewGuid().ToString('N')).tar.gz"
+$archive = Join-Path ([System.IO.Path]::GetTempPath()) $archiveName
+$remoteArchive = "/tmp/$archiveName"
+$remoteScriptName = "postmerce-marketing-deploy-$([Guid]::NewGuid().ToString('N')).sh"
+$remoteScriptPath = Join-Path ([System.IO.Path]::GetTempPath()) $remoteScriptName
+$remoteScriptRemotePath = "/tmp/$remoteScriptName"
 
-if (Test-Path $archive) {
-  Remove-Item -Path $archive -Force
-}
+try {
+  if (Test-Path $archive) {
+    Remove-Item -LiteralPath $archive -Force
+  }
 
-# Run tar command. -C changes directory to $distDir and . packages the contents
-Start-Process tar -ArgumentList "-czf", $archive, "-C", $distDir, "." -NoNewWindow -Wait
+  $tarProcess = Start-Process tar -ArgumentList "-czf", $archive, "-C", $distDir, "." -NoNewWindow -Wait -PassThru
+  if ($tarProcess.ExitCode -ne 0 -or -not (Test-Path $archive)) {
+    throw "Failed to package marketing build output"
+  }
 
-Write-Host "Uploading package to server..."
-scp @sshArgs $archive "${User}@${HostName}:$remoteArchive"
+  Write-Host "Uploading package to server..."
+  scp @sshArgs $archive "${User}@${HostName}:$remoteArchive"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to upload marketing package"
+  }
 
-Write-Host "Extracting release and updating symlink on VPS..."
-$remoteScript = @'
+  Write-Host "Extracting release and updating symlink on VPS..."
+  $remoteScript = @'
 set -euo pipefail
 
 RELEASE_NAME=$(date +%Y%m%d-%H%M%S)
 RELEASE_DIR="/srv/apps/postmerce-marketing/releases/$RELEASE_NAME"
-ARCHIVE="/tmp/marketing.tar.gz"
+ARCHIVE="__REMOTE_ARCHIVE__"
+trap 'rm -f "$ARCHIVE"' EXIT
 
 echo "Creating release directory: $RELEASE_DIR"
 sudo mkdir -p "$RELEASE_DIR"
@@ -52,29 +67,31 @@ echo "Setting permissions..."
 sudo chown -R ops:ops "$RELEASE_DIR"
 
 echo "Updating current symlink..."
-sudo ln -sfn "$RELEASE_DIR" /srv/apps/postmerce-marketing/current
-
-echo "Cleaning up..."
-rm -f "$ARCHIVE"
+sudo ln -sfnT "$RELEASE_DIR" /srv/apps/postmerce-marketing/current
 
 echo "Marketing site successfully deployed to $RELEASE_DIR"
 '@
+  $remoteScript = $remoteScript.Replace("__REMOTE_ARCHIVE__", $remoteArchive)
 
-$remoteScriptPath = Join-Path ([System.IO.Path]::GetTempPath()) "marketing-deploy.sh"
-$remoteScriptRemotePath = "/tmp/marketing-deploy.sh"
-[System.IO.File]::WriteAllText(
-  $remoteScriptPath,
-  $remoteScript,
-  [System.Text.UTF8Encoding]::new($false)
-)
+  [System.IO.File]::WriteAllText(
+    $remoteScriptPath,
+    $remoteScript,
+    [System.Text.UTF8Encoding]::new($false)
+  )
 
-scp @sshArgs $remoteScriptPath "${User}@${HostName}:$remoteScriptRemotePath"
+  scp @sshArgs $remoteScriptPath "${User}@${HostName}:$remoteScriptRemotePath"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to upload marketing deploy script"
+  }
 
-$remoteDeployCommand = "bash $remoteScriptRemotePath; status=`$?; rm -f $remoteScriptRemotePath; exit `$status"
-ssh @sshArgs "${User}@${HostName}" $remoteDeployCommand
-
-# Cleanup local temp files
-Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue
-Remove-Item -LiteralPath $remoteScriptPath -Force -ErrorAction SilentlyContinue
+  $remoteDeployCommand = "bash $remoteScriptRemotePath; status=`$?; rm -f $remoteScriptRemotePath; exit `$status"
+  ssh @sshArgs "${User}@${HostName}" $remoteDeployCommand
+  if ($LASTEXITCODE -ne 0) {
+    throw "Marketing deploy failed on the VPS"
+  }
+} finally {
+  Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue
+  Remove-Item -LiteralPath $remoteScriptPath -Force -ErrorAction SilentlyContinue
+}
 
 Write-Host "Deployment completed successfully!"

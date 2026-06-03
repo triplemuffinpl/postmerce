@@ -1,5 +1,6 @@
 import type { PostDetails, SocialAccountRecord } from "../../domain.js";
-import { postMediaPreview, postStatusBadge, targetCards, targetStatusBadge, platformLabel } from "../components/post-components.js";
+import { postMediaPreview, postStatusBadge, targetCards, targetStatusBadge } from "../components/post-components.js";
+import { platformBadge } from "../components/platform-meta.js";
 import { targetEditorForm } from "../components/target-control-components.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
@@ -57,7 +58,7 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
 
       <section class="page-header compact">
         <p class="eyebrow">Wpis #${post.id}</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em; word-break: break-all;">${escapeHtml(post.title)}</h1>
+        <h1 style="font-weight: 800; word-break: break-all;">${escapeHtml(post.title)}</h1>
         <p class="lead">Tekst bazowy powiązany z ${targets.length} celami platform społecznościowych.</p>
       </section>
 
@@ -66,7 +67,7 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
 
       <!-- Media Preview & Metadata Split Grid -->
       <section class="media-detail-grid" style="margin-bottom: 32px;">
-        <div class="media-preview large" style="height: 100%; min-height: 380px; box-shadow: var(--shadow-md);">
+        <div class="media-preview large">
           ${postMediaPreview(media)}
         </div>
         <div class="panel">
@@ -124,7 +125,10 @@ export function postDetailsPage(options: PostDetailsPageOptions): string {
               <article class="target-card">
                 <div class="target-card-head">
                   <div>
-                    <h3>${escapeHtml(platformLabel(target.platform))} #${target.id}</h3>
+                    <h3 class="target-platform-title">
+                      ${platformBadge(target.platform)}
+                      <span class="target-id">#${target.id}</span>
+                    </h3>
                     <p class="row-meta" style="margin: 4px 0 0;">Konto: ${target.socialAccountId === null ? "auto" : `#${target.socialAccountId}`}</p>
                   </div>
                   ${targetStatusBadge(target.status)}

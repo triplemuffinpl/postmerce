@@ -21,6 +21,8 @@
   
   --success: #10b981;
   --success-soft: #ecfdf5;
+  --simulated: #65a30d;
+  --simulated-soft: #f7fee7;
   --warning: #f59e0b;
   --warning-soft: #fffbeb;
   --danger: #f43f5e;
@@ -62,6 +64,8 @@
   
   --primary-soft: hsl(var(--primary-hue), var(--primary-saturation), 12%);
   --success-soft: rgba(16, 185, 129, 0.12);
+  --simulated: #a3e635;
+  --simulated-soft: rgba(163, 230, 53, 0.12);
   --warning-soft: rgba(245, 158, 11, 0.12);
   --danger-soft: rgba(244, 63, 94, 0.12);
 
@@ -273,6 +277,7 @@ a {
 
 /* Content container */
 .content-shell {
+  min-width: 0;
   padding: clamp(24px, 4vw, 48px);
 }
 
@@ -754,6 +759,10 @@ p {
   overflow: hidden;
 }
 
+.control-table-wrap {
+  overflow: visible;
+}
+
 .media-table {
   background: var(--panel);
   border-collapse: collapse;
@@ -822,6 +831,8 @@ p {
   aspect-ratio: 16 / 9;
   box-shadow: var(--shadow-md);
   min-height: 280px;
+  min-width: 0;
+  width: 100%;
 }
 
 .media-placeholder {
@@ -935,6 +946,55 @@ p {
   border-color: rgba(244, 244, 245, 0.15);
 }
 
+.platform-icon-wrap {
+  border-radius: var(--radius-sm);
+  display: grid;
+  padding: 8px;
+  place-items: center;
+}
+
+.platform-icon-wrap.platform-youtube {
+  background: var(--platform-youtube-soft);
+  color: var(--platform-youtube);
+}
+
+.platform-icon-wrap.platform-linkedin {
+  background: var(--platform-linkedin-soft);
+  color: var(--platform-linkedin);
+}
+
+.platform-icon-wrap.platform-instagram {
+  background: var(--platform-instagram-soft);
+  color: var(--platform-instagram);
+}
+
+.platform-icon-wrap.platform-facebook {
+  background: var(--platform-facebook-soft);
+  color: var(--platform-facebook);
+}
+
+.platform-icon-wrap.platform-tiktok {
+  background: var(--platform-tiktok-soft);
+  color: var(--platform-tiktok);
+}
+
+.account-summary-list,
+.account-summary-item {
+  align-items: center;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.account-summary-list {
+  gap: 8px;
+}
+
+.account-summary-item .status-badge {
+  font-size: 0.68rem;
+  padding: 3px 7px;
+}
+
 /* Status Badges */
 .status-badge {
   display: inline-flex;
@@ -976,6 +1036,10 @@ p {
   background: var(--success-soft);
   color: var(--success);
 }
+.status-lime {
+  background: var(--simulated-soft);
+  color: var(--simulated);
+}
 .status-cyan {
   background: rgba(6, 182, 212, 0.12);
   color: #06b6d4;
@@ -1007,6 +1071,15 @@ p {
   border-radius: 50%;
   background: currentColor;
   animation: badge-pulse 1.2s infinite ease-in-out;
+}
+
+.status-badge.simulated,
+.status-badge.skipped {
+  border: 1px dashed currentColor;
+}
+
+.status-badge.skipped {
+  opacity: 0.72;
 }
 
 /* Error Block styling */
@@ -1340,6 +1413,10 @@ p {
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
 }
 
+.media-detail-grid > * {
+  min-width: 0;
+}
+
 .compact-media-grid {
   display: grid;
   gap: 12px;
@@ -1410,6 +1487,18 @@ p {
 .target-card-head svg {
   height: 24px;
   width: 24px;
+}
+
+.target-platform-title {
+  align-items: center;
+  display: flex;
+  font-size: 0.9rem;
+  gap: 8px;
+  margin: 0;
+}
+
+.target-platform-title .target-id {
+  color: var(--primary);
 }
 
 .target-card h3 {
@@ -1664,6 +1753,12 @@ p {
 .calendar-target-pill.platform-facebook .platform-dot-icon { color: var(--platform-facebook); }
 .calendar-target-pill.platform-tiktok .platform-dot-icon { color: var(--platform-tiktok); }
 
+.calendar-target-pill.platform-youtube:hover { background: var(--platform-youtube-soft); }
+.calendar-target-pill.platform-linkedin:hover { background: var(--platform-linkedin-soft); }
+.calendar-target-pill.platform-instagram:hover { background: var(--platform-instagram-soft); }
+.calendar-target-pill.platform-facebook:hover { background: var(--platform-facebook-soft); }
+.calendar-target-pill.platform-tiktok:hover { background: var(--platform-tiktok-soft); }
+
 .status-dot-indicator {
   width: 6px;
   height: 6px;
@@ -1867,13 +1962,44 @@ p {
   color: var(--primary);
 }
 .inline-editor-popover {
-  margin-top: 10px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
+  max-height: min(70vh, 620px);
+  overflow: auto;
   padding: 16px;
-  width: 320px;
+  position: absolute;
+  right: 0;
   text-align: left;
+  top: calc(100% + 8px);
+  width: min(520px, calc(100vw - 96px));
+  z-index: 120;
 }
 
+@media (max-width: 900px) {
+  .inline-editor-popover {
+    box-shadow: var(--shadow-sm);
+    margin-top: 10px;
+    max-height: none;
+    overflow: visible;
+    position: static;
+    width: 100%;
+  }
+
+  .row-actions-bar {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

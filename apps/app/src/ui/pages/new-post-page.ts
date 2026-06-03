@@ -147,7 +147,7 @@ export function newPostPage(options: NewPostPageOptions): string {
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Dystrybucja etap 1</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Utwórz Nowy Wpis</h1>
+        <h1 style="font-weight: 800;">Utwórz Nowy Wpis</h1>
         <p class="lead">Zdefiniuj główny wpis, wybierz powiązany klip wideo, a następnie spersonalizuj opisy dla poszczególnych mediów społecznościowych.</p>
       </section>
 

@@ -1,7 +1,7 @@
 import type { MediaAssetRecord, PostListItem, PostTargetRecord } from "../../domain.js";
 import { storagePathToPublicUrl } from "../../services/storage-service.js";
 import { escapeHtml } from "../html.js";
-import { platformLabel, platformIcon } from "./platform-meta.js";
+import { platformBadge, platformLabel } from "./platform-meta.js";
 import { postStatusBadge, targetStatusBadge } from "./status-meta.js";
 
 export { platformLabel, targetStatusBadge, postStatusBadge };
@@ -155,10 +155,7 @@ export function targetCards(targets: PostTargetRecord[]): string {
           return `
             <article class="target-card">
               <div class="target-card-head">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  ${platformIcon(target.platform)}
-                  <h3 style="font-size: 1.05rem; font-weight: 700;">${platformLabel(target.platform)}</h3>
-                </div>
+                <h3 class="target-platform-title">${platformBadge(target.platform)}</h3>
                 ${targetStatusBadge(target.status)}
               </div>
               ${

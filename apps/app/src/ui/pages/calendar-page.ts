@@ -161,7 +161,7 @@ export function calendarPage(options: CalendarPageOptions): string {
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Plan publikacji</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Kalendarz</h1>
+        <h1 style="font-weight: 800;">Kalendarz</h1>
         <p class="lead">Widok miesięczny targetów publikacji. Tu najłatwiej zauważyć luki, kumulacje i targety wymagające reakcji.</p>
       </section>
 

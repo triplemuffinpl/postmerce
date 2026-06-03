@@ -24,7 +24,7 @@ export function mediaPage(options: MediaPageOptions): string {
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Przetwarzanie wideo</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Biblioteka Mediów</h1>
+        <h1 style="font-weight: 800;">Biblioteka Mediów</h1>
         <p class="lead">Wgraj swoje klipy wideo, a silnik automatycznie zbada parametry techniczne wideo przez FFprobe oraz wygeneruje miniaturki za pomocą FFmpeg.</p>
       </section>
 
@@ -121,7 +121,7 @@ export function mediaPage(options: MediaPageOptions): string {
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Dostępne Media</h2>
             <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Przeglądaj przesłane pliki wideo, zanalizowane kodeki i ich parametry.</p>
           </div>
-          <span class="status-badge status-muted" style="font-weight: 700;">Suma: ${options.media.length} plików</span>
+          <span class="status-badge status-gray" style="font-weight: 700;">Suma: ${options.media.length} plików</span>
         </div>
         ${mediaTable(options.media)}
       </section>

@@ -287,7 +287,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
 
   return `
     <!-- Desktop View -->
-    <div class="desktop-only table-wrap">
+    <div class="desktop-only table-wrap control-table-wrap">
       <table class="media-table">
         <thead>
           <tr>

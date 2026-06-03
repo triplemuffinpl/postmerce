@@ -1,5 +1,5 @@
 import type { MediaAssetRecord, MediaStatus } from "../../domain.js";
-import { classNames, escapeHtml } from "../html.js";
+import { escapeHtml } from "../html.js";
 import { storagePathToPublicUrl } from "../../services/storage-service.js";
 
 const statusLabels: Record<MediaStatus, string> = {
@@ -8,6 +8,14 @@ const statusLabels: Record<MediaStatus, string> = {
   ready: "Gotowy",
   invalid: "Niepoprawny",
   deleted: "Usunięty"
+};
+
+const statusClasses: Record<MediaStatus, string> = {
+  uploaded: "status-blue",
+  probing: "status-cyan",
+  ready: "status-green",
+  invalid: "status-red",
+  deleted: "status-slate"
 };
 
 export function metricValue(value: number | null, kind: "bytes" | "seconds" | "number"): string {
@@ -35,14 +43,7 @@ export function metricValue(value: number | null, kind: "bytes" | "seconds" | "n
 }
 
 export function mediaStatusBadge(status: MediaStatus): string {
-  const className = classNames([
-    "status-badge",
-    status === "ready" && "status-ok",
-    status === "invalid" && "status-danger",
-    status !== "ready" && status !== "invalid" && "status-muted"
-  ]);
-
-  return `<span class="${className}">${statusLabels[status]}</span>`;
+  return `<span class="status-badge ${statusClasses[status]}">${statusLabels[status]}</span>`;
 }
 
 export function mediaThumbnail(media: MediaAssetRecord): string {

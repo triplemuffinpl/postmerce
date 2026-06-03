@@ -19,7 +19,7 @@ export function postsPage(options: PostsPageOptions): string {
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Przebieg dystrybucji</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Wpisy i Publikacje</h1>
+        <h1 style="font-weight: 800;">Wpisy i Publikacje</h1>
         <p class="lead">Stwórz jeden nadrzędny wpis bazowy, a następnie dostosuj opisy i hasztagi niezależnie dla każdej wybranej sieci społecznościowej.</p>
       </section>
 
@@ -48,7 +48,7 @@ export function postsPage(options: PostsPageOptions): string {
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Utworzone wpisy</h2>
             <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Lista wszystkich postów bazowych wraz z ich planami dystrybucji.</p>
           </div>
-          <span class="status-badge status-muted" style="font-weight: 700;">Suma: ${options.posts.length} wpisów</span>
+          <span class="status-badge status-gray" style="font-weight: 700;">Suma: ${options.posts.length} wpisów</span>
         </div>
         ${postTable(options.posts)}
       </section>

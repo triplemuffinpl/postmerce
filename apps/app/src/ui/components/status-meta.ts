@@ -13,7 +13,7 @@ export const targetStatusMeta: Record<PostTargetStatus, StatusMetadata> = {
   publishing: { label: "Publikowanie", colorClass: "status-amber", badgeVariant: "status-pulse" },
   processing_on_platform: { label: "Przetwarzanie", colorClass: "status-cyan", badgeVariant: "has-loader" },
   published: { label: "Opublikowany", colorClass: "status-green" },
-  simulated: { label: "Symulacja", colorClass: "status-green", badgeVariant: "simulated" },
+  simulated: { label: "Symulacja", colorClass: "status-lime", badgeVariant: "simulated" },
   failed: { label: "Błąd", colorClass: "status-red" },
   requires_user_action: { label: "Wymaga reakcji", colorClass: "status-orange" },
   cancelled: { label: "Anulowany", colorClass: "status-slate" },

@@ -25,7 +25,7 @@ export function jobsPage(options: JobsPageOptions): string {
     body: `
       <section class="page-header compact">
         <p class="eyebrow">Silnik tła PostgreSQL</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Kolejka Zleceń</h1>
+        <h1 style="font-weight: 800;">Kolejka Zleceń</h1>
         <p class="lead">Procesy w tle pobierają zlecenia za pomocą bezpiecznych blokad PostgreSQL. Obecnie kolejka przetwarza zadania próbne (Dry-run).</p>
       </section>
 
@@ -39,7 +39,7 @@ export function jobsPage(options: JobsPageOptions): string {
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Zlecenia Publikacji</h2>
             <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Status wykonania zadań dystrybucyjnych.</p>
           </div>
-          <span class="status-badge status-muted" style="font-weight: 700;">Suma: ${options.jobs.length} zleceń</span>
+          <span class="status-badge status-gray" style="font-weight: 700;">Suma: ${options.jobs.length} zleceń</span>
         </div>
         ${jobsTable(options.jobs)}
       </section>
@@ -51,7 +51,7 @@ export function jobsPage(options: JobsPageOptions): string {
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Aktywne Procesy Workera</h2>
             <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Monitorowanie stanu zdrowia (liveness) i aktywności procesów w tle.</p>
           </div>
-          <span class="status-badge status-ok" style="font-weight: 700;">Aktywne: ${options.heartbeats.length} procesy</span>
+          <span class="status-badge status-green" style="font-weight: 700;">Aktywne: ${options.heartbeats.length} procesy</span>
         </div>
         ${heartbeatPanel(options.heartbeats)}
       </section>

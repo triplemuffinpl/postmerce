@@ -146,7 +146,7 @@ h1 {
   font-family: 'Outfit', 'Inter', sans-serif;
   font-size: 3.8rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   line-height: 1.1;
   margin: 0;
   max-width: 890px;
@@ -865,3 +865,21 @@ h1 {
   box-shadow: 0 30px 60px rgba(124, 58, 237, 0.12), 0 0 0 1px rgba(124, 58, 237, 0.1);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .screenshot-stack {
+    opacity: 1;
+  }
+}
