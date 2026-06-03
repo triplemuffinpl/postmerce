@@ -14,6 +14,7 @@ import { registerJobRoutes } from "./routes/jobs.js";
 import { registerMediaRoutes } from "./routes/media.js";
 import { registerPostRoutes } from "./routes/posts.js";
 import { registerPublishingRoutes } from "./routes/publishing.js";
+import { registerSettingsRoutes } from "./routes/settings.js";
 
 const currentFile = fileURLToPath(import.meta.url);
 const appRoot = path.resolve(path.dirname(currentFile), "../..");
@@ -55,6 +56,7 @@ export async function createServer() {
   await registerPostRoutes(server);
   await registerPublishingRoutes(server);
   await registerJobRoutes(server);
+  await registerSettingsRoutes(server);
 
   return server;
 }

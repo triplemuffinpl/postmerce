@@ -5,12 +5,12 @@ import { escapeHtml } from "../html.js";
 import { platformBadge } from "./platform-meta.js";
 import { targetStatusBadge } from "./status-meta.js";
 
-export function formatDateTime(date: Date | null): string {
-  return date ? escapeHtml(formatAppDateTime(date)) : "brak";
+export function formatDateTime(date: Date | null, timezone?: string): string {
+  return date ? escapeHtml(formatAppDateTime(date, timezone)) : "brak";
 }
 
-export function dateTimeLocalValue(date: Date | null): string {
-  return formatDateTimeLocalInput(date);
+export function dateTimeLocalValue(date: Date | null, timezone?: string): string {
+  return formatDateTimeLocalInput(date, timezone);
 }
 
 export function accountLabel(account: SocialAccountRecord): string {
@@ -37,29 +37,76 @@ export function accountSelectOptions(
   ].join("");
 }
 
+function canQueueTarget(target: PostTargetRecord): boolean {
+  return ["draft", "scheduled", "failed", "requires_user_action", "cancelled", "skipped"].includes(target.status);
+}
+
+function canCancelTarget(target: PostTargetRecord): boolean {
+  return ["draft", "scheduled", "queued", "failed", "requires_user_action"].includes(target.status);
+}
+
+function contentTypeLabel(target: PostTargetRecord): string {
+  if (target.platform !== "youtube") {
+    return "";
+  }
+
+  return target.platformOptions.contentType === "video" ? "Film" : "Short";
+}
+
 export function targetActionForms(target: PostTargetRecord, returnTo: string): string {
   const returnInput = `<input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />`;
-
-  return `
-    <div class="inline-actions" style="flex-wrap: wrap;">
+  const queueAction = canQueueTarget(target)
+    ? `
       <form action="/targets/${target.id}/queue" method="post" style="display:inline-flex; gap: 8px; align-items: center;">
         ${returnInput}
         <button class="inline-action" type="submit">Kolejkuj teraz</button>
       </form>
-      <form action="/targets/${target.id}/duplicate" method="post" style="display:inline;">
-        ${returnInput}
-        <button class="inline-action" type="submit">Duplikuj</button>
-      </form>
+    `
+    : "";
+  const cancelAction = canCancelTarget(target)
+    ? `
       <form action="/targets/${target.id}/cancel" method="post" style="display:inline;">
         ${returnInput}
         <button class="inline-action danger" type="submit">Anuluj</button>
       </form>
+    `
+    : "";
+
+  return `
+    <div class="inline-actions" style="flex-wrap: wrap;">
+      ${queueAction}
+      <form action="/targets/${target.id}/duplicate" method="post" style="display:inline;">
+        ${returnInput}
+        <button class="inline-action" type="submit">Duplikuj</button>
+      </form>
+      ${cancelAction}
     </div>
   `;
 }
 
-export function targetRowActions(target: TargetControlItem, accounts: SocialAccountRecord[], returnTo: string): string {
+export function targetRowActions(
+  target: TargetControlItem,
+  accounts: SocialAccountRecord[],
+  returnTo: string,
+  timezone: string
+): string {
   const returnInput = `<input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />`;
+  const queueAction = canQueueTarget(target)
+    ? `
+          <form action="/targets/${target.id}/queue" method="post" style="margin: 0;">
+            ${returnInput}
+            <button type="submit" class="dropdown-item">Kolejkuj teraz</button>
+          </form>
+    `
+    : "";
+  const cancelAction = canCancelTarget(target)
+    ? `
+          <form action="/targets/${target.id}/cancel" method="post" style="margin: 0;">
+            ${returnInput}
+            <button type="submit" class="dropdown-item danger">Anuluj target</button>
+          </form>
+    `
+    : "";
 
   return `
     <div class="row-actions-bar">
@@ -67,7 +114,7 @@ export function targetRowActions(target: TargetControlItem, accounts: SocialAcco
       <details class="inline-editor-details">
         <summary class="action-btn-secondary">Edytuj</summary>
         <div class="inline-editor-popover">
-          ${targetEditorForm(target, accounts, returnTo)}
+          ${targetEditorForm(target, accounts, returnTo, timezone)}
         </div>
       </details>
 
@@ -79,17 +126,15 @@ export function targetRowActions(target: TargetControlItem, accounts: SocialAcco
           </svg>
         </summary>
         <div class="actions-dropdown-menu">
-          <form action="/targets/${target.id}/queue" method="post" style="margin: 0;">
-            ${returnInput}
-            <button type="submit" class="dropdown-item">Kolejkuj teraz</button>
-          </form>
+          ${queueAction}
           <form action="/targets/${target.id}/duplicate" method="post" style="margin: 0;">
             ${returnInput}
             <button type="submit" class="dropdown-item">Duplikuj target</button>
           </form>
-          <form action="/targets/${target.id}/cancel" method="post" style="margin: 0;">
+          ${cancelAction}
+          <form action="/targets/${target.id}/delete" method="post" style="margin: 0;" onsubmit="return confirm('Usunąć target i jego lokalne zlecenia z Postmerce?')">
             ${returnInput}
-            <button type="submit" class="dropdown-item danger">Anuluj target</button>
+            <button type="submit" class="dropdown-item danger">Usuń z Postmerce</button>
           </form>
         </div>
       </details>
@@ -97,7 +142,12 @@ export function targetRowActions(target: TargetControlItem, accounts: SocialAcco
   `;
 }
 
-export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccountRecord[], returnTo: string): string {
+export function targetEditorForm(
+  target: PostTargetRecord,
+  accounts: SocialAccountRecord[],
+  returnTo: string,
+  timezone: string
+): string {
   return `
     <form class="post-form" action="/targets/${target.id}/update" method="post" style="gap: 14px;">
       <input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />
@@ -110,7 +160,7 @@ export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccou
         </label>
         <label>
           <span>Harmonogram targetu</span>
-          <input name="scheduled_at" type="datetime-local" value="${dateTimeLocalValue(target.scheduledAt)}" />
+          <input name="scheduled_at" type="datetime-local" value="${dateTimeLocalValue(target.scheduledAt, timezone)}" />
         </label>
       </div>
       <div class="form-grid two">
@@ -129,6 +179,19 @@ export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccou
               .join("")}
           </select>
         </label>
+        ${
+          target.platform === "youtube"
+            ? `
+              <label>
+                <span>Typ publikacji YouTube</span>
+                <select name="content_type">
+                  <option value="short" ${target.platformOptions.contentType === "video" ? "" : "selected"}>Short</option>
+                  <option value="video" ${target.platformOptions.contentType === "video" ? "selected" : ""}>Film</option>
+                </select>
+              </label>
+            `
+            : ""
+        }
       </div>
       <label>
         <span>Caption / opis</span>
@@ -146,7 +209,12 @@ export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccou
   `;
 }
 
-export function targetControlTable(targets: TargetControlItem[], accounts: SocialAccountRecord[], returnTo: string): string {
+export function targetControlTable(
+  targets: TargetControlItem[],
+  accounts: SocialAccountRecord[],
+  returnTo: string,
+  timezone: string
+): string {
   if (targets.length === 0) {
     return `
       <section class="empty-state">
@@ -163,6 +231,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
             ${platformBadge(target.platform, true)}
             <strong style="color: var(--primary); font-size: 0.85rem;">#${target.id}</strong>
+            ${contentTypeLabel(target) ? `<span class="row-meta">${contentTypeLabel(target)}</span>` : ""}
           </div>
         </td>
         <td>
@@ -179,7 +248,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           <span class="row-meta">${escapeHtml(target.accountStatus ?? "auto")}</span>
         </td>
         <td>
-          <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt)}</strong>
+          <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt, timezone)}</strong>
           <span class="row-meta">Job: ${target.latestJobId ? `#${target.latestJobId}` : "brak"}</span>
         </td>
         <td>
@@ -203,7 +272,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           }
         </td>
         <td>
-          ${targetRowActions(target, accounts, returnTo)}
+          ${targetRowActions(target, accounts, returnTo, timezone)}
         </td>
       </tr>
     `)
@@ -216,6 +285,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           <div style="display: flex; align-items: center; gap: 8px;">
             ${platformBadge(target.platform, true)}
             <strong style="color: var(--primary);">#${target.id}</strong>
+            ${contentTypeLabel(target) ? `<span class="row-meta">${contentTypeLabel(target)}</span>` : ""}
           </div>
           ${targetStatusBadge(target.status)}
         </div>
@@ -236,7 +306,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           </div>
           <div class="mobile-card-row">
             <span>Harmonogram</span>
-            <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt)}</strong>
+            <strong>${formatDateTime(target.scheduledAt ?? target.postScheduledAt, timezone)}</strong>
           </div>
           <div class="mobile-card-row">
             <span>Zlecenie (Job)</span>
@@ -269,7 +339,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           }
         </div>
         <div style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px;">
-          ${targetRowActions(target, accounts, returnTo)}
+          ${targetRowActions(target, accounts, returnTo, timezone)}
         </div>
       </article>
     `)

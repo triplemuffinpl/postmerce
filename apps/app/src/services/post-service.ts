@@ -12,11 +12,13 @@ import { getPlatformConfigs } from "./platform-registry.js";
 import type { FormRecord } from "../http/form.js";
 import { formValue, formValues, optionalDateTimeLocal } from "../http/form.js";
 import type { MediaAssetRecord, SocialAccountRecord } from "../domain.js";
+import { getAppSettings } from "./settings-service.js";
 
 export interface NewPostFormData {
   media: MediaAssetRecord[];
   platforms: ReturnType<typeof getPlatformConfigs>;
   accounts: SocialAccountRecord[];
+  settings: Awaited<ReturnType<typeof getAppSettings>>;
 }
 
 export interface CreatePostResult {
@@ -96,7 +98,10 @@ function buildTargets(
         platformCaption: caption,
         platformHashtags: emptyToNull(formValue(form, `${platform}_hashtags`)) ?? baseHashtags,
         platformOptions: {
-          privacy: formValue(form, `${platform}_privacy`) || "default"
+          privacy: formValue(form, `${platform}_privacy`) || "default",
+          ...(platform === "youtube"
+            ? { contentType: formValue(form, `${platform}_content_type`) === "video" ? "video" : "short" }
+            : {})
         },
         status: targetStatus,
         scheduledAt
@@ -106,15 +111,17 @@ function buildTargets(
 }
 
 export async function getNewPostFormData(): Promise<NewPostFormData> {
-  const [media, accounts] = await Promise.all([
+  const [media, accounts, settings] = await Promise.all([
     getRecentMedia(),
-    listConnectedSocialAccounts()
+    listConnectedSocialAccounts(),
+    getAppSettings()
   ]);
 
   return {
     media: media.filter((item) => item.status === "ready"),
     platforms: getPlatformConfigs(),
-    accounts
+    accounts,
+    settings
   };
 }
 
@@ -126,7 +133,9 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
   const baseHashtags = emptyToNull(formValue(form, "base_hashtags"));
   const action = formValue(form, "action");
   const shouldQueue = action === "schedule";
-  const scheduledAt = optionalDateTimeLocal(formValue(form, "scheduled_at"));
+  const settings = await getAppSettings();
+  const scheduledAtRaw = formValue(form, "scheduled_at");
+  const scheduledAt = optionalDateTimeLocal(scheduledAtRaw, settings.timezone);
   const postStatus: CreatePostInput["status"] = shouldQueue ? "queued" : "draft";
   const targetStatus: CreatePostTargetInput["status"] = shouldQueue ? "queued" : "draft";
   const accounts = await listConnectedSocialAccounts();
@@ -139,6 +148,10 @@ export async function createPostFromForm(form: FormRecord): Promise<CreatePostRe
 
   if (!title) {
     errors.push("Title is required.");
+  }
+
+  if (scheduledAtRaw.trim() && !scheduledAt) {
+    errors.push(`Schedule date is invalid for timezone ${settings.timezone}.`);
   }
 
   if (targets.length === 0) {

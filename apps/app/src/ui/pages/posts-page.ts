@@ -5,6 +5,7 @@ import { layout } from "../layout.js";
 
 interface PostsPageOptions {
   posts: PostListItem[];
+  timezone: string;
   notice?: string;
 }
 
@@ -50,7 +51,7 @@ export function postsPage(options: PostsPageOptions): string {
           </div>
           <span class="status-badge status-gray" style="font-weight: 700;">Suma: ${options.posts.length} wpisów</span>
         </div>
-        ${postTable(options.posts)}
+        ${postTable(options.posts, options.timezone)}
       </section>
     `
   });

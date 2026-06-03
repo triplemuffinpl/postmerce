@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { cancelJob, getJobsPageData, retryJob } from "../../services/queue-service.js";
+import { cancelJob, deleteJob, getJobsPageData, parseJobsView, retryJob } from "../../services/queue-service.js";
 import { jobsPage } from "../../ui/pages/jobs-page.js";
 
 function firstQueryValue(value: string | string[] | undefined): string | undefined {
@@ -14,7 +14,7 @@ function parseJobId(params: unknown): number | null {
 export async function registerJobRoutes(server: FastifyInstance): Promise<void> {
   server.get("/jobs", async (request, reply) => {
     const query = request.query as Record<string, string | string[] | undefined>;
-    const data = await getJobsPageData();
+    const data = await getJobsPageData(parseJobsView(firstQueryValue(query.view)));
     const notice = firstQueryValue(query.notice);
     const error = firstQueryValue(query.error);
 
@@ -47,5 +47,16 @@ export async function registerJobRoutes(server: FastifyInstance): Promise<void> 
 
     const ok = await cancelJob(jobId);
     return reply.redirect(ok ? "/jobs?notice=Job+cancelled" : "/jobs?error=Job+cannot+be+cancelled");
+  });
+
+  server.post("/jobs/:id/delete", async (request, reply) => {
+    const jobId = parseJobId(request.params);
+
+    if (!jobId) {
+      return reply.redirect("/jobs?error=Invalid+job");
+    }
+
+    const ok = await deleteJob(jobId);
+    return reply.redirect(ok ? "/jobs?notice=Job+deleted" : "/jobs?error=Job+cannot+be+deleted");
   });
 }

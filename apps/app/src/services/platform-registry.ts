@@ -2,7 +2,7 @@ import { env } from "../config/env.js";
 import type { Platform, PlatformConfig } from "../domain.js";
 
 const labels: Record<Platform, string> = {
-  youtube: "YouTube Shorts",
+  youtube: "YouTube",
   linkedin: "LinkedIn",
   instagram: "Instagram Reels",
   facebook: "Facebook Page/Reels",

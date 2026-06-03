@@ -76,7 +76,7 @@ export class DryRunPublisher implements PlatformPublisher {
 
   public getPlatformLimits(): PlatformLimits {
     return {
-      maxDurationSeconds: 600,
+      maxDurationSeconds: 43200,
       maxFileSizeMb: 500,
       maxCaptionLength: 2200
     };

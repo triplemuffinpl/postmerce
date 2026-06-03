@@ -43,10 +43,10 @@ export function formValues(form: FormRecord, key: string): string[] {
   return value ? [value] : [];
 }
 
-export function optionalDateTimeLocal(value: string): Date | null {
+export function optionalDateTimeLocal(value: string, timezone?: string): Date | null {
   if (!value.trim()) {
     return null;
   }
 
-  return parseDateTimeLocal(value);
+  return parseDateTimeLocal(value, timezone);
 }

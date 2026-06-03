@@ -679,7 +679,7 @@ export async function cancelPublishJob(jobId: number): Promise<boolean> {
     );
     const job = result.rows[0];
 
-    if (!job || job.status === "running" || job.status === "succeeded" || job.status === "cancelled") {
+    if (!job || job.status !== "pending") {
       await client.query("commit");
       return false;
     }
@@ -708,6 +708,57 @@ export async function cancelPublishJob(jobId: number): Promise<boolean> {
             updated_at = now()
           where id = $1
             and status not in ('published', 'simulated')
+        `,
+        [job.post_target_id]
+      );
+      await refreshPostStatusByTargetId(Number(job.post_target_id), client);
+    }
+
+    await client.query("commit");
+    return true;
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deletePublishJob(jobId: number): Promise<boolean> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("begin");
+    const result = await client.query<PublishJobRow>(
+      "select * from publish_jobs where id = $1 for update",
+      [jobId]
+    );
+    const job = result.rows[0];
+
+    if (!job || job.status === "running") {
+      await client.query("commit");
+      return false;
+    }
+
+    await client.query("delete from publish_jobs where id = $1", [jobId]);
+
+    if (job.post_target_id) {
+      await client.query(
+        `
+          update post_targets
+          set
+            status = case when scheduled_at is not null and scheduled_at > now() then 'scheduled' else 'draft' end,
+            error_code = null,
+            error_message = null,
+            updated_at = now()
+          where id = $1
+            and status not in ('published', 'simulated', 'publishing')
+            and not exists (
+              select 1
+              from publish_jobs
+              where post_target_id = $1
+                and status in ('pending', 'running')
+            )
         `,
         [job.post_target_id]
       );

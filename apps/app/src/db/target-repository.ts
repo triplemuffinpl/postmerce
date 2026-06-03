@@ -211,7 +211,23 @@ export async function listTargetControlItems(limit = 200): Promise<TargetControl
   const result = await pool.query<TargetControlRow>(
     `
       ${targetControlSelect("")}
-      order by coalesce(t.scheduled_at, p.scheduled_at, t.updated_at) desc, t.id desc
+      order by
+        case
+          when t.status in ('failed', 'requires_user_action') then 0
+          when t.status in ('publishing', 'processing_on_platform', 'queued') then 1
+          when t.status = 'scheduled' then 2
+          when t.status = 'draft' then 3
+          else 4
+        end asc,
+        case
+          when t.status in ('failed', 'requires_user_action', 'publishing', 'processing_on_platform', 'queued', 'scheduled')
+          then coalesce(t.scheduled_at, p.scheduled_at, t.updated_at)
+        end asc nulls last,
+        case
+          when t.status in ('published', 'simulated', 'cancelled', 'skipped')
+          then t.updated_at
+        end desc nulls last,
+        t.id asc
       limit $1
     `,
     [limit]
@@ -386,6 +402,34 @@ export async function cancelPostTarget(id: number): Promise<boolean> {
   );
   await refreshPostStatus(target.postId);
   return true;
+}
+
+export async function deletePostTarget(id: number): Promise<boolean> {
+  const client = await pool.connect();
+
+  try {
+    await client.query("begin");
+    const result = await client.query<PostTargetRow>(
+      "select * from post_targets where id = $1 for update",
+      [id]
+    );
+    const target = result.rows[0];
+
+    if (!target || target.status === "publishing") {
+      await client.query("commit");
+      return false;
+    }
+
+    await client.query("delete from post_targets where id = $1", [id]);
+    await client.query("commit");
+    await refreshPostStatus(Number(target.post_id));
+    return true;
+  } catch (error) {
+    await client.query("rollback");
+    throw error;
+  } finally {
+    client.release();
+  }
 }
 
 export async function duplicatePostTarget(id: number): Promise<PostTargetRecord | null> {

@@ -12,16 +12,28 @@ interface DateTimeParts {
 const dateTimeLocalPattern =
   /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/;
 
-const dateTimePartsFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: env.timezone,
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hourCycle: "h23"
-});
+const formatterCache = new Map<string, Intl.DateTimeFormat>();
+
+function dateTimePartsFormatter(timezone: string): Intl.DateTimeFormat {
+  const cached = formatterCache.get(timezone);
+
+  if (cached) {
+    return cached;
+  }
+
+  const formatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: timezone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  });
+  formatterCache.set(timezone, formatter);
+  return formatter;
+}
 
 function partValue(parts: Intl.DateTimeFormatPart[], type: Intl.DateTimeFormatPartTypes): number {
   return Number(parts.find((part) => part.type === type)?.value ?? "0");
@@ -53,8 +65,8 @@ function sameParts(first: DateTimeParts, second: DateTimeParts): boolean {
   );
 }
 
-function timezoneOffsetMilliseconds(date: Date): number {
-  const parts = appDateTimeParts(date);
+function timezoneOffsetMilliseconds(date: Date, timezone: string): number {
+  const parts = appDateTimeParts(date, timezone);
   const representedAsUtc = Date.UTC(
     parts.year,
     parts.month - 1,
@@ -68,8 +80,17 @@ function timezoneOffsetMilliseconds(date: Date): number {
   return representedAsUtc - dateWithoutMilliseconds;
 }
 
-export function appDateTimeParts(date: Date): DateTimeParts {
-  const parts = dateTimePartsFormatter.formatToParts(date);
+export function isValidTimezone(timezone: string): boolean {
+  try {
+    dateTimePartsFormatter(timezone).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function appDateTimeParts(date: Date, timezone = env.timezone): DateTimeParts {
+  const parts = dateTimePartsFormatter(timezone).formatToParts(date);
 
   return {
     year: partValue(parts, "year"),
@@ -81,7 +102,7 @@ export function appDateTimeParts(date: Date): DateTimeParts {
   };
 }
 
-export function parseDateTimeLocal(value: string): Date | null {
+export function parseDateTimeLocal(value: string, timezone = env.timezone): Date | null {
   const match = dateTimeLocalPattern.exec(value.trim());
 
   if (!match) {
@@ -112,7 +133,7 @@ export function parseDateTimeLocal(value: string): Date | null {
   let timestamp = wallClockAsUtc;
 
   for (let iteration = 0; iteration < 3; iteration += 1) {
-    const offset = timezoneOffsetMilliseconds(new Date(timestamp));
+    const offset = timezoneOffsetMilliseconds(new Date(timestamp), timezone);
     const adjustedTimestamp = wallClockAsUtc - offset;
 
     if (adjustedTimestamp === timestamp) {
@@ -123,19 +144,19 @@ export function parseDateTimeLocal(value: string): Date | null {
   }
 
   const parsed = new Date(timestamp);
-  return sameParts(appDateTimeParts(parsed), wallClock) ? parsed : null;
+  return sameParts(appDateTimeParts(parsed, timezone), wallClock) ? parsed : null;
 }
 
-export function formatAppDateTime(date: Date): string {
-  return date.toLocaleString("pl-PL", { timeZone: env.timezone });
+export function formatAppDateTime(date: Date, timezone = env.timezone): string {
+  return date.toLocaleString("pl-PL", { timeZone: timezone });
 }
 
-export function formatDateTimeLocalInput(date: Date | null): string {
+export function formatDateTimeLocalInput(date: Date | null, timezone = env.timezone): string {
   if (!date) {
     return "";
   }
 
-  const parts = appDateTimeParts(date);
+  const parts = appDateTimeParts(date, timezone);
   const pad = (value: number): string => String(value).padStart(2, "0");
 
   return `${parts.year}-${pad(parts.month)}-${pad(parts.day)}T${pad(parts.hour)}:${pad(parts.minute)}`;

@@ -1,5 +1,6 @@
-import type { MediaAssetRecord, PlatformConfig, SocialAccountRecord } from "../../domain.js";
+import type { AppSettings, MediaAssetRecord, PlatformConfig, SocialAccountRecord } from "../../domain.js";
 import { mediaThumbnail } from "../components/media-components.js";
+import { platformBadge } from "../components/platform-meta.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
 
@@ -7,6 +8,7 @@ interface NewPostPageOptions {
   media: MediaAssetRecord[];
   platforms: PlatformConfig[];
   accounts: SocialAccountRecord[];
+  settings: AppSettings;
   errors?: string[];
 }
 
@@ -93,47 +95,74 @@ function platformFields(platforms: PlatformConfig[], accounts: SocialAccountReco
   return platforms
     .map((platform) => {
       const disabled = platform.enabled ? "" : "disabled";
-      const checked = platform.enabled ? "checked" : "";
       const platformId = platform.platform;
+      const connectedCount = accounts.filter((account) => account.platform === platform.platform).length;
 
       return `
-        <article class="platform-editor ${platform.enabled ? "" : "is-disabled"}" style="padding: 24px; border: 1px solid var(--line); border-radius: var(--radius-lg); margin-bottom: 16px;">
-          <label class="target-toggle" style="margin-bottom: 16px;">
-            <input type="checkbox" name="platforms" value="${platformId}" ${checked} ${disabled} style="height: 20px; width: 20px;" />
-            <span style="font-size: 1.1rem; font-weight: 700;">Dystrybucja na: ${escapeHtml(platform.label)}</span>
+        <article class="platform-editor platform-selector ${platform.enabled ? "" : "is-disabled"}" data-platform-editor="${platformId}">
+          <label class="target-toggle platform-selector-head">
+            <input type="checkbox" name="platforms" value="${platformId}" ${disabled} onchange="togglePlatformEditor('${platformId}', this.checked)" />
+            <span class="platform-selector-identity">
+              ${platformBadge(platform.platform)}
+              <span class="platform-selector-copy">
+                <strong>${escapeHtml(platform.label)}</strong>
+                <small>${platform.enabled ? `${connectedCount} połączonych kont` : "Integracja wyłączona"}</small>
+              </span>
+            </span>
+            <span class="platform-selector-state">${platform.enabled ? "Wybierz" : "Niedostępna"}</span>
           </label>
-          <div class="form-grid two">
-            <label>
-              <span>Konto publikujace</span>
-              <select name="${platformId}_account_id" ${disabled}>
-                ${accountOptions(accounts, platform)}
-              </select>
-            </label>
-            <label>
-              <span>Tytuł dla ${escapeHtml(platform.label)}</span>
-              <input name="${platformId}_title" type="text" ${disabled} placeholder="Zostaw puste, aby użyć tytułu bazowego" />
-            </label>
+          <div class="platform-selector-body" data-platform-body="${platformId}" hidden>
+            <div class="form-grid two">
+              <label>
+                <span>Konto publikujące</span>
+                <select name="${platformId}_account_id" ${disabled}>
+                  ${accountOptions(accounts, platform)}
+                </select>
+              </label>
+              ${
+                platform.platform === "youtube"
+                  ? `
+                    <label>
+                      <span>Typ publikacji</span>
+                      <select name="${platformId}_content_type" ${disabled}>
+                        <option value="short">Short</option>
+                        <option value="video">Film</option>
+                      </select>
+                    </label>
+                  `
+                  : ""
+              }
+            </div>
+            <p class="field-hint">${accountHint(accounts, platform)}</p>
+            <details class="platform-overrides">
+              <summary>Dostosuj treść i widoczność dla ${escapeHtml(platform.label)}</summary>
+              <div class="platform-overrides-body">
+                <div class="form-grid two">
+                  <label>
+                    <span>Tytuł</span>
+                    <input name="${platformId}_title" type="text" ${disabled} placeholder="Użyj tytułu bazowego" />
+                  </label>
+                  <label>
+                    <span>Widoczność</span>
+                    <select name="${platformId}_privacy" ${disabled}>
+                      <option value="default">Domyślna dla konta</option>
+                      <option value="private">Prywatna</option>
+                      <option value="unlisted">Niepubliczna</option>
+                      <option value="public">Publiczna</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  <span>Opis / caption</span>
+                  <textarea name="${platformId}_caption" rows="4" ${disabled} placeholder="Użyj opisu bazowego"></textarea>
+                </label>
+                <label>
+                  <span>Hashtagi</span>
+                  <input name="${platformId}_hashtags" type="text" ${disabled} placeholder="Użyj hashtagów bazowych" />
+                </label>
+              </div>
+            </details>
           </div>
-          <p style="color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; font-weight: 600;">${accountHint(accounts, platform)}</p>
-          <div class="form-grid two" style="margin-top: 14px;">
-            <label>
-              <span>Widoczność (Privacy)</span>
-              <select name="${platformId}_privacy" ${disabled}>
-                <option value="default">Domyślna dla konta</option>
-                <option value="private">Prywatna (Private)</option>
-                <option value="unlisted">Niepubliczna (Unlisted)</option>
-                <option value="public">Publiczna (Public)</option>
-              </select>
-            </label>
-          </div>
-          <label style="margin-top: 14px;">
-            <span>Opis / Caption dla ${escapeHtml(platform.label)}</span>
-            <textarea name="${platformId}_caption" rows="4" ${disabled} placeholder="Zostaw puste, aby użyć opisu bazowego"></textarea>
-          </label>
-          <label style="margin-top: 14px;">
-            <span>Hashtagi (#tag1 #tag2)</span>
-            <input name="${platformId}_hashtags" type="text" ${disabled} placeholder="Zostaw puste, aby użyć hashtagów bazowych" />
-          </label>
         </article>
       `;
     })
@@ -146,9 +175,9 @@ export function newPostPage(options: NewPostPageOptions): string {
     active: "posts",
     body: `
       <section class="page-header compact">
-        <p class="eyebrow">Dystrybucja etap 1</p>
-        <h1 style="font-weight: 800;">Utwórz Nowy Wpis</h1>
-        <p class="lead">Zdefiniuj główny wpis, wybierz powiązany klip wideo, a następnie spersonalizuj opisy dla poszczególnych mediów społecznościowych.</p>
+        <p class="eyebrow">Nowa publikacja</p>
+        <h1 style="font-weight: 800;">Utwórz wpis</h1>
+        <p class="lead">Wybierz materiał, przygotuj treść bazową i dodaj tylko te kanały, na które chcesz publikować.</p>
       </section>
 
       ${errorList(options.errors)}
@@ -158,8 +187,8 @@ export function newPostPage(options: NewPostPageOptions): string {
         <section class="panel">
           <div class="panel-header" style="margin-bottom: 20px;">
             <div style="display: grid; gap: 4px;">
-              <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">1. Powiązany plik wideo</h2>
-              <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Wskaż, który plik wideo z biblioteki mediów ma zostać opublikowany.</p>
+              <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">1. Materiał</h2>
+              <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Wybierz gotowe wideo z biblioteki.</p>
             </div>
             <a class="text-link" style="font-weight:700;" href="/media">Wgraj wideo</a>
           </div>
@@ -176,8 +205,8 @@ export function newPostPage(options: NewPostPageOptions): string {
         <!-- Base copy panel -->
         <section class="panel">
           <div style="margin-bottom: 20px;">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">2. Dane bazowe wpisu</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Wpisz domyślny tytuł, opis i tagi. Zostaną one automatycznie skopiowane do platform docelowych, jeśli ich nie nadpiszesz.</p>
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">2. Treść i termin</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Ta treść zostanie użyta wszędzie, gdzie nie ustawisz osobnego wariantu.</p>
           </div>
           <div class="form-grid two">
             <label>
@@ -185,7 +214,7 @@ export function newPostPage(options: NewPostPageOptions): string {
               <input name="title" type="text" required placeholder="Wpisz chwytliwy tytuł wideo" />
             </label>
             <label>
-              <span>Data i czas publikacji (Harmonogram)</span>
+              <span>Data i czas publikacji · ${escapeHtml(options.settings.timezone)}</span>
               <input name="scheduled_at" type="datetime-local" />
             </label>
           </div>
@@ -202,8 +231,8 @@ export function newPostPage(options: NewPostPageOptions): string {
         <!-- Platform specific fields overrides card -->
         <section class="panel">
           <div style="margin-bottom: 20px;">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">3. Personalizacja platform</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Możesz dostosować tytuły, opisy i opcje prywatności niezależnie dla każdej platformy.</p>
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">3. Kanały dystrybucji</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 4px 0 0; font-weight: 500;">Wybierz platformy. Dopiero wtedy pokażą się ustawienia konta i opcjonalne nadpisania.</p>
           </div>
           <div class="platform-editor-grid">
             ${platformFields(options.platforms, options.accounts)}
@@ -216,7 +245,7 @@ export function newPostPage(options: NewPostPageOptions): string {
             Zapisz jako szkic
           </button>
           <button class="button-link" type="submit" name="action" value="schedule">
-            Zaplanuj / Wyślij do kolejki testowej
+            ${options.settings.dryRun ? "Dodaj do kolejki testowej" : "Zaplanuj publikację live"}
           </button>
         </section>
       </form>
@@ -237,6 +266,16 @@ export function newPostPage(options: NewPostPageOptions): string {
             console.error('Error preselecting video dropdown asset ID', e);
           }
         })();
+
+        function togglePlatformEditor(platform, checked) {
+          const editor = document.querySelector('[data-platform-editor="' + platform + '"]');
+          const body = document.querySelector('[data-platform-body="' + platform + '"]');
+          if (!editor || !body) return;
+          editor.classList.toggle('is-selected', checked);
+          body.hidden = !checked;
+          const state = editor.querySelector('.platform-selector-state');
+          if (state) state.textContent = checked ? 'Wybrana' : 'Wybierz';
+        }
       </script>
     `
   });

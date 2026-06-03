@@ -10,7 +10,7 @@ let shuttingDown = false;
 
 logger.info("worker", "Publish worker booted", {
   workerId,
-  mode: env.dryRun ? "dry_run" : "live",
+  mode: "runtime_setting",
   runOnce
 });
 

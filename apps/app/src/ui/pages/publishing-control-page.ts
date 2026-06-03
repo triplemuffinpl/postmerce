@@ -1,4 +1,4 @@
-import type { PublishingControlData } from "../../services/target-service.js";
+import type { ControlView, PublishingControlData } from "../../services/target-service.js";
 import { targetControlTable } from "../components/target-control-components.js";
 import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
@@ -33,7 +33,14 @@ function metricCard(label: string, value: number, tone: "ok" | "danger" | "muted
   `;
 }
 
+function tabLink(view: ControlView, label: string, count: number, current: ControlView): string {
+  const currentAttr = view === current ? ` aria-current="page"` : "";
+  return `<a class="filter-tab" href="/control?view=${view}"${currentAttr}>${escapeHtml(label)} <span>${count}</span></a>`;
+}
+
 export function publishingControlPage(options: PublishingControlPageOptions): string {
+  const returnTo = `/control?view=${options.view}`;
+
   return layout({
     title: "Kontrola Publikacji",
     active: "control",
@@ -41,7 +48,7 @@ export function publishingControlPage(options: PublishingControlPageOptions): st
       <section class="page-header compact">
         <p class="eyebrow">Publish control center</p>
         <h1 style="font-weight: 800;">Kontrola publikacji</h1>
-        <p class="lead">Jedno miejsce do sprawdzania targetów, kont, statusów, błędów i szybkich akcji na kolejce.</p>
+        <p class="lead">Centrum decyzji dla targetów: konto, treść, termin, status i lokalne akcje na publikacji.</p>
       </section>
 
       ${messageBanner("notice", options.notice)}
@@ -57,11 +64,22 @@ export function publishingControlPage(options: PublishingControlPageOptions): st
         <div class="panel-header" style="margin-bottom: 24px;">
           <div style="display: grid; gap: 4px;">
             <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Targety operacyjne</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Edytuj, kolejkuj, anuluj i duplikuj targety bez przechodzenia po pojedynczych wpisach.</p>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Problemy, aktywne publikacje i szkice są sortowane jako pierwsze; historia jest osobnym widokiem.</p>
           </div>
-          <a class="button-link secondary" href="/calendar">Kalendarz</a>
+          <div class="inline-actions">
+            <span class="status-badge ${options.settings.dryRun ? "status-lime" : "status-red"}">${options.settings.dryRun ? "Tryb testowy" : "Live"}</span>
+            <a class="button-link secondary" href="/calendar">Kalendarz</a>
+          </div>
         </div>
-        ${targetControlTable(options.targets, options.accounts, "/control")}
+        <nav class="filter-tabs" aria-label="Widoki targetów">
+          ${tabLink("operational", "Operacyjne", options.counts.operational, options.view)}
+          ${tabLink("problems", "Problemy", options.counts.problems, options.view)}
+          ${tabLink("upcoming", "Kolejka", options.counts.upcoming, options.view)}
+          ${tabLink("drafts", "Szkice", options.counts.drafts, options.view)}
+          ${tabLink("completed", "Historia", options.counts.completed, options.view)}
+          ${tabLink("all", "Wszystkie", options.counts.all, options.view)}
+        </nav>
+        ${targetControlTable(options.targets, options.accounts, returnTo, options.settings.timezone)}
       </section>
     `
   });

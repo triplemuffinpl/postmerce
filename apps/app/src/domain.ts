@@ -38,6 +38,11 @@ export type PublishJobStatus = "pending" | "running" | "succeeded" | "failed" | 
 
 export type ErrorClass = "temporary" | "auth" | "validation" | "unknown";
 
+export interface AppSettings {
+  dryRun: boolean;
+  timezone: string;
+}
+
 export interface PlatformConfig {
   platform: Platform;
   label: string;

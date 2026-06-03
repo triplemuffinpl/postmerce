@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { listConnectedSocialAccounts } from "../../db/account-repository.js";
 import { bodyToFormRecord } from "../form.js";
 import { createPostFromForm, getNewPostFormData, getPostDetails, getPostList } from "../../services/post-service.js";
+import { getAppSettings } from "../../services/settings-service.js";
 import { newPostPage } from "../../ui/pages/new-post-page.js";
 import { postDetailsPage } from "../../ui/pages/post-details-page.js";
 import { postsPage } from "../../ui/pages/posts-page.js";
@@ -13,12 +14,13 @@ function firstQueryValue(value: string | string[] | undefined): string | undefin
 export async function registerPostRoutes(server: FastifyInstance): Promise<void> {
   server.get("/posts", async (request, reply) => {
     const query = request.query as Record<string, string | string[] | undefined>;
-    const posts = await getPostList();
+    const [posts, settings] = await Promise.all([getPostList(), getAppSettings()]);
     const notice = firstQueryValue(query.notice);
 
     return reply.type("text/html").send(
       postsPage({
         posts,
+        timezone: settings.timezone,
         ...(notice ? { notice } : {})
       })
     );
@@ -62,7 +64,7 @@ export async function registerPostRoutes(server: FastifyInstance): Promise<void>
     const details = await getPostDetails(id);
     const notice = firstQueryValue(query.notice);
     const error = firstQueryValue(query.error);
-    const accounts = await listConnectedSocialAccounts();
+    const [accounts, settings] = await Promise.all([listConnectedSocialAccounts(), getAppSettings()]);
 
     return reply
       .code(details ? 200 : 404)
@@ -71,6 +73,7 @@ export async function registerPostRoutes(server: FastifyInstance): Promise<void>
         postDetailsPage({
           details,
           accounts,
+          timezone: settings.timezone,
           ...(notice ? { notice } : {}),
           ...(error ? { error } : {})
         })

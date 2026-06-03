@@ -36,7 +36,7 @@ const envSchema = z.object({
   FFMPEG_PATH: z.string().default("ffmpeg"),
   FFPROBE_PATH: z.string().default("ffprobe"),
   MAX_UPLOAD_MB: z.coerce.number().int().positive().default(500),
-  MAX_DURATION_SECONDS: z.coerce.number().int().positive().default(600),
+  MAX_DURATION_SECONDS: z.coerce.number().int().positive().default(43200),
   MAX_VIDEO_WIDTH: z.coerce.number().int().positive().default(3840),
   MAX_VIDEO_HEIGHT: z.coerce.number().int().positive().default(3840),
   CLEANUP_AFTER_DAYS: z.coerce.number().int().positive().default(30),

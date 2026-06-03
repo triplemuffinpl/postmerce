@@ -1,79 +1,134 @@
-import type { PlatformConfig } from "../../domain.js";
-import { platformList } from "../components/platform-list.js";
+import type { DashboardData } from "../../services/dashboard-service.js";
+import { formatAppDateTime } from "../../date-time.js";
+import { escapeHtml } from "../html.js";
 import { layout } from "../layout.js";
+import { platformBadge } from "../components/platform-meta.js";
+import { targetStatusBadge } from "../components/status-meta.js";
 
-interface DashboardPageOptions {
-  platforms: PlatformConfig[];
+function targetTime(target: DashboardData["targets"][number], timezone: string): string {
+  const date = target.scheduledAt ?? target.postScheduledAt ?? target.latestJobRunAfter ?? target.updatedAt;
+  return formatAppDateTime(date, timezone);
 }
 
-export function dashboardPage(options: DashboardPageOptions): string {
+function metricCard(label: string, value: string | number, href: string, tone: "normal" | "danger" | "success" = "normal"): string {
+  const toneClass = tone === "danger" ? "dashboard-metric danger" : tone === "success" ? "dashboard-metric success" : "dashboard-metric";
+
+  return `
+    <a class="${toneClass}" href="${href}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(String(value))}</strong>
+    </a>
+  `;
+}
+
+function targetList(title: string, empty: string, targets: DashboardData["targets"], timezone: string): string {
+  if (targets.length === 0) {
+    return `
+      <section class="dashboard-list">
+        <div class="dashboard-list-head">
+          <h2>${escapeHtml(title)}</h2>
+        </div>
+        <p class="dashboard-empty">${escapeHtml(empty)}</p>
+      </section>
+    `;
+  }
+
+  return `
+    <section class="dashboard-list">
+      <div class="dashboard-list-head">
+        <h2>${escapeHtml(title)}</h2>
+        <a class="text-link" href="/control">Zobacz targety</a>
+      </div>
+      <div class="dashboard-target-stack">
+        ${targets
+          .map((target) => `
+            <a class="dashboard-target-row" href="/posts/${target.postId}">
+              <span>${platformBadge(target.platform, true)}</span>
+              <strong>${escapeHtml(target.postTitle)}</strong>
+              <small>${escapeHtml(targetTime(target, timezone))}</small>
+              ${targetStatusBadge(target.status)}
+            </a>
+          `)
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function setupChecklist(data: DashboardData): string {
+  const items = [
+    {
+      done: data.readyMedia.length > 0,
+      label: "Gotowe media",
+      href: "/media"
+    },
+    {
+      done: data.accounts.length > 0,
+      label: "Połączone konta",
+      href: "/accounts"
+    },
+    {
+      done: data.targets.length > 0,
+      label: "Pierwsze targety",
+      href: "/posts/new"
+    }
+  ];
+
+  return `
+    <section class="dashboard-checklist">
+      <h2>Setup</h2>
+      ${items
+        .map((item) => `
+          <a href="${item.href}" class="${item.done ? "is-done" : ""}">
+            <span>${item.done ? "OK" : "Do zrobienia"}</span>
+            <strong>${escapeHtml(item.label)}</strong>
+          </a>
+        `)
+        .join("")}
+    </section>
+  `;
+}
+
+export function dashboardPage(data: DashboardData): string {
+  const queued = data.targets.filter((target) => target.status === "queued" || target.status === "scheduled").length;
+  const completed = data.targets.filter((target) => target.status === "published" || target.status === "simulated").length;
+  const modeLabel = data.settings.dryRun ? "Tryb testowy" : "Live";
+
   return layout({
     title: "Dashboard",
     active: "dashboard",
     body: `
-      <section class="page-header">
-        <p class="eyebrow">Centrum publikacji</p>
-        <h1 style="font-weight: 800;">Witaj w Postmerce</h1>
-        <p class="lead">
-          Przygotuj jeden materiał, rozbij go na platformowe targety i kontroluj
-          każde wyjście z poziomu jednego panelu: konto, opis, termin, kolejkę i status.
-        </p>
-      </section>
-
-      <section class="metric-grid" aria-label="Status systemu Postmerce">
-        <article>
-          <div class="metric-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.57-.598-3.75h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-            </svg>
-          </div>
-          <div class="metric-content">
-            <span>Kontrola publikacji</span>
-            <strong>Targety per platforma</strong>
-          </div>
-        </article>
-
-        <article>
-          <div class="metric-icon" style="color: var(--warning); background: var(--warning-soft);">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V10.125m16.5 0v3.75m-16.5-3.75v3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125v-3.75" />
-            </svg>
-          </div>
-          <div class="metric-content">
-            <span>Kolejka zleceń</span>
-            <strong>Publikowanie poza requestem</strong>
-          </div>
-        </article>
-
-        <article>
-          <div class="metric-icon" style="color: var(--success); background: var(--success-soft);">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 17.25v1.007a3 3 0 01-.879 2.122L7.5 21h9l-.621-.621A3 3 0 0115 18.257V17.25m6-12V15a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 15V5.25m18 0A2.25 2.25 0 0018.75 3H5.25A2.25 2.25 0 003 5.25m18 0V12a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 12V5.25" />
-            </svg>
-          </div>
-          <div class="metric-content">
-            <span>Statusy i reakcje</span>
-            <strong>Osobna historia targetu</strong>
-          </div>
-        </article>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header" style="margin-bottom: 24px;">
-          <div style="display: grid; gap: 4px;">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Kanały dystrybucji</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">
-              Platformy, konta i tryby publikacji, które możesz kontrolować w Postmerce.
-            </p>
-          </div>
-          <a class="text-link" style="font-weight: 700;" href="/accounts">Zarządzaj kontami</a>
+      <section class="dashboard-hero">
+        <div>
+          <p class="eyebrow">Postmerce</p>
+          <h1>Panel publikacji</h1>
+          <p class="lead">Najkrótsza droga: media → wpis → targety → kolejka → status.</p>
         </div>
-        ${platformList({
-          platforms: options.platforms,
-          accounts: [],
-          youtubeOAuthConfigured: false,
-          showConnectionDetails: false
-        })}
+        <div class="dashboard-mode-card ${data.settings.dryRun ? "is-dry" : "is-live"}">
+          <span>Tryb</span>
+          <strong>${modeLabel}</strong>
+          <a href="/settings">${data.settings.dryRun ? "Włącz live" : "Ustawienia"}</a>
+        </div>
+      </section>
+
+      <section class="dashboard-actions" aria-label="Najważniejsze akcje">
+        <a class="button-link" href="/posts/new">Nowy wpis</a>
+        <a class="button-link secondary" href="/media">Wgraj media</a>
+        <a class="button-link secondary" href="/control">Kontrola targetów</a>
+        <a class="button-link secondary" href="/settings">Ustawienia</a>
+      </section>
+
+      <section class="dashboard-metrics" aria-label="Stan operacyjny">
+        ${metricCard("Media gotowe", data.readyMedia.length, "/media", "success")}
+        ${metricCard("W kolejce", queued, "/control?view=upcoming")}
+        ${metricCard("Problemy", data.problems.length, "/control?view=problems", data.problems.length > 0 ? "danger" : "normal")}
+        ${metricCard("Zakończone", completed, "/control?view=completed")}
+      </section>
+
+      <section class="dashboard-grid">
+        ${targetList("Najbliższe publikacje", "Brak aktywnych publikacji.", data.upcoming, data.settings.timezone)}
+        ${targetList("Wymaga reakcji", "Brak błędów i ręcznych akcji.", data.problems, data.settings.timezone)}
+        ${setupChecklist(data)}
       </section>
     `
   });

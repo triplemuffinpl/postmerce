@@ -4,8 +4,8 @@ import { escapeHtml } from "../html.js";
 import { platformBadge } from "./platform-meta.js";
 import { jobStatusBadge, targetStatusBadge } from "./status-meta.js";
 
-function formatDate(date: Date | null): string {
-  return date ? escapeHtml(formatAppDateTime(date)) : "brak";
+function formatDate(date: Date | null, timezone: string): string {
+  return date ? escapeHtml(formatAppDateTime(date, timezone)) : "brak";
 }
 
 function jobActions(job: PublishJobListItem): string {
@@ -23,7 +23,7 @@ function jobActions(job: PublishJobListItem): string {
       `
       : "";
   const cancelButton =
-    job.status === "pending" || job.status === "failed"
+    job.status === "pending"
       ? `
         <form action="/jobs/${job.id}/cancel" method="post" style="display:inline;">
           <button class="inline-action danger" type="submit" title="Anuluj zlecenie">
@@ -35,15 +35,25 @@ function jobActions(job: PublishJobListItem): string {
         </form>
       `
       : "";
+  const deleteButton =
+    job.status !== "running"
+      ? `
+        <form action="/jobs/${job.id}/delete" method="post" style="display:inline;" onsubmit="return confirm('Usunąć to zlecenie z historii Postmerce?')">
+          <button class="inline-action danger" type="submit" title="Usuń zlecenie">
+            Usuń
+          </button>
+        </form>
+      `
+      : "";
 
-  if (!retryButton && !cancelButton) {
+  if (!retryButton && !cancelButton && !deleteButton) {
     return `<span class="muted-label" style="font-size:0.8rem; font-weight:600;">Brak akcji</span>`;
   }
 
-  return `<div class="inline-actions">${retryButton}${cancelButton}</div>`;
+  return `<div class="inline-actions">${retryButton}${cancelButton}${deleteButton}</div>`;
 }
 
-export function jobsTable(jobs: PublishJobListItem[]): string {
+export function jobsTable(jobs: PublishJobListItem[], timezone: string): string {
   if (jobs.length === 0) {
     return `
       <section class="empty-state">
@@ -78,7 +88,7 @@ export function jobsTable(jobs: PublishJobListItem[]): string {
         <td>${jobStatusBadge(job.status)}</td>
         <td>
           <span class="row-meta" style="font-weight: 600;">Uruchom po:</span>
-          <strong style="font-size: 0.9rem;">${formatDate(job.runAfter)}</strong>
+          <strong style="font-size: 0.9rem;">${formatDate(job.runAfter, timezone)}</strong>
           ${
             job.lockedBy
               ? `<span class="row-meta" style="background: var(--warning-soft); color: var(--warning); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px; font-weight: 600;">Zablokowane przez: ${escapeHtml(job.lockedBy)}</span>`
@@ -144,7 +154,7 @@ export function jobsTable(jobs: PublishJobListItem[]): string {
           </div>
           <div class="mobile-card-row">
             <span>Uruchom po</span>
-            <strong>${formatDate(job.runAfter)}</strong>
+            <strong>${formatDate(job.runAfter, timezone)}</strong>
           </div>
           ${
             job.lockedBy
@@ -206,7 +216,7 @@ export function jobsTable(jobs: PublishJobListItem[]): string {
   `;
 }
 
-export function heartbeatPanel(heartbeats: WorkerHeartbeatRecord[]): string {
+export function heartbeatPanel(heartbeats: WorkerHeartbeatRecord[], timezone: string): string {
   if (heartbeats.length === 0) {
     return `
       <section class="empty-state compact-empty">
@@ -228,7 +238,7 @@ export function heartbeatPanel(heartbeats: WorkerHeartbeatRecord[]): string {
               <span class="pulse-indicator" style="background: var(--success); width: 8px; height: 8px; border-radius: 50%; display: inline-block; animation: pulse 2s infinite;"></span>
               <strong style="font-size: 0.95rem;">${escapeHtml(heartbeat.workerId)}</strong>
             </div>
-            <span style="font-size: 0.85rem; font-weight: 600;">Ostatnia aktywność: ${formatDate(heartbeat.lastSeenAt)}</span>
+            <span style="font-size: 0.85rem; font-weight: 600;">Ostatnia aktywność: ${formatDate(heartbeat.lastSeenAt, timezone)}</span>
             <code style="word-break: break-all;">${escapeHtml(JSON.stringify(heartbeat.metadata))}</code>
           </article>
         `)

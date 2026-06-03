@@ -2,9 +2,11 @@ import type { FastifyInstance } from "fastify";
 import { bodyToFormRecord, formValue } from "../form.js";
 import {
   cancelTarget,
+  deleteTarget,
   duplicateTarget,
   getCalendarPageData,
   getPublishingControlData,
+  parseControlView,
   queueTargetFromForm,
   updateTargetFromForm,
   type TargetActionResult
@@ -49,7 +51,7 @@ async function targetActionRedirect(
 export async function registerPublishingRoutes(server: FastifyInstance): Promise<void> {
   server.get("/control", async (request, reply) => {
     const query = request.query as Record<string, string | string[] | undefined>;
-    const data = await getPublishingControlData();
+    const data = await getPublishingControlData(parseControlView(firstQueryValue(query.view)));
     const notice = firstQueryValue(query.notice);
     const error = firstQueryValue(query.error);
 
@@ -122,6 +124,18 @@ export async function registerPublishingRoutes(server: FastifyInstance): Promise
 
     return reply.redirect(
       await targetActionRedirect(request.body, async () => duplicateTarget(targetId))
+    );
+  });
+
+  server.post("/targets/:id/delete", async (request, reply) => {
+    const targetId = parseTargetId(request.params);
+
+    if (!targetId) {
+      return reply.redirect("/control?error=Invalid+target");
+    }
+
+    return reply.redirect(
+      await targetActionRedirect(request.body, async () => deleteTarget(targetId))
     );
   });
 }

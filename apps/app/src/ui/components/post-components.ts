@@ -23,7 +23,7 @@ function thumbnailFromPath(path: string | null, label: string): string {
   return `<img src="${thumbnailUrl}" alt="${escapeHtml(label)}" loading="lazy" />`;
 }
 
-export function postTable(posts: PostListItem[]): string {
+export function postTable(posts: PostListItem[], timezone: string): string {
   if (posts.length === 0) {
     return `
       <section class="empty-state">
@@ -52,7 +52,7 @@ export function postTable(posts: PostListItem[]): string {
         <td><strong style="font-size: 0.95rem;">${post.targetCount} cel(e)</strong></td>
         <td>
           <strong style="font-size:0.9rem;">
-            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt)) : `<span style="color:var(--muted); font-weight:500;">Brak harmonogramu</span>`}
+            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt, timezone)) : `<span style="color:var(--muted); font-weight:500;">Brak harmonogramu</span>`}
           </strong>
         </td>
       </tr>
@@ -78,7 +78,7 @@ export function postTable(posts: PostListItem[]): string {
         <div class="mobile-card-row" style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px;">
           <span>Harmonogram</span>
           <strong>
-            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt)) : `<span style="color:var(--muted); font-weight:500;">Brak</span>`}
+            ${post.scheduledAt ? escapeHtml(formatAppDateTime(post.scheduledAt, timezone)) : `<span style="color:var(--muted); font-weight:500;">Brak</span>`}
           </strong>
         </div>
       </article>
@@ -148,7 +148,7 @@ export function postMediaPreview(media: MediaAssetRecord | null): string {
   `;
 }
 
-export function targetCards(targets: PostTargetRecord[]): string {
+export function targetCards(targets: PostTargetRecord[], timezone: string): string {
   return `
     <div class="target-grid">
       ${targets
@@ -171,6 +171,16 @@ export function targetCards(targets: PostTargetRecord[]): string {
                   : ""
               }
               <dl class="target-meta">
+                ${
+                  target.platform === "youtube"
+                    ? `
+                      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+                        <dt style="color: var(--muted); font-weight: 600;">Typ</dt>
+                        <dd style="font-weight: 700;">${target.platformOptions.contentType === "video" ? "Film" : "Short"}</dd>
+                      </div>
+                    `
+                    : ""
+                }
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                   <dt style="color: var(--muted); font-weight: 600;">Widoczność</dt>
                   <dd style="font-weight: 700;">${escapeHtml(String(target.platformOptions.privacy ?? "domyślna"))}</dd>
@@ -181,7 +191,7 @@ export function targetCards(targets: PostTargetRecord[]): string {
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
                   <dt style="color: var(--muted); font-weight: 600;">Harmonogram</dt>
-                  <dd style="font-weight: 700;">${target.scheduledAt ? escapeHtml(formatAppDateTime(target.scheduledAt)) : "brak"}</dd>
+                  <dd style="font-weight: 700;">${target.scheduledAt ? escapeHtml(formatAppDateTime(target.scheduledAt, timezone)) : "brak"}</dd>
                 </div>
               </dl>
             </article>
