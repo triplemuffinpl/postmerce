@@ -1,15 +1,72 @@
 ---
 import "../styles/site.css";
+
+const workflowSteps = [
+  {
+    title: "Wgraj materiał",
+    text: "Jeden plik wideo trafia do biblioteki. System sprawdza metadane, czas trwania i gotowość pliku do dalszej pracy.",
+  },
+  {
+    title: "Zbuduj bazowy post",
+    text: "Tworzysz tytuł, opis, hashtagi i intencję komunikatu bez mieszania tego z wymaganiami konkretnej platformy.",
+  },
+  {
+    title: "Dopasuj targety",
+    text: "Każda platforma dostaje osobny tytuł, opis, ustawienia prywatności, konto i termin publikacji.",
+  },
+  {
+    title: "Wyślij do kolejki",
+    text: "HTTP nie publikuje bezpośrednio. Targety zamieniają się w zadania, a worker publikuje albo robi kontrolowany dry-run.",
+  },
+  {
+    title: "Sprawdź status",
+    text: "Widzisz osobny stan każdego targetu: queued, publishing, simulated, published, failed albo requires user action.",
+  },
+  {
+    title: "Popraw i powtórz",
+    text: "Błędy, retry, anulowanie i duplikowanie targetów są częścią procesu, nie ukrytym skutkiem ubocznym.",
+  },
+];
+
+const statusItems = [
+  {
+    label: "Gotowe dziś",
+    text: "Media, posty, targety per platforma, kolejka PostgreSQL, worker, dry-run, kalendarz, control center i konta.",
+  },
+  {
+    label: "Pierwszy live adapter",
+    text: "YouTube ma przygotowany OAuth i publisher do kontrolowanego testu po konfiguracji produkcyjnych danych.",
+  },
+  {
+    label: "Następne kroki",
+    text: "LinkedIn, Meta, Instagram i TikTok będą dochodzić po review API i prywatnym potwierdzeniu loopa.",
+  },
+];
+
+const audienceCards = [
+  {
+    title: "Dla operatorów contentu",
+    text: "Dla ludzi, którzy publikują dużo i muszą pilnować wersji, platform, kont, terminów oraz błędów.",
+  },
+  {
+    title: "Dla founderów i małych zespołów",
+    text: "Dla osób, które nie potrzebują jeszcze wielkiego social suite, ale potrzebują porządku w dystrybucji.",
+  },
+  {
+    title: "Dla agencji",
+    text: "Dla zespołów, które chcą zamienić ręczne publikowanie w czytelny proces z targetami, statusami i historią.",
+  },
+];
 ---
 
 <html lang="pl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Postmerce - publish once, adapt everywhere</title>
+    <title>Postmerce - jeden materiał, osobne publikacje, pełna kontrola</title>
     <meta
       name="description"
-      content="Postmerce is a private-first publishing system for video content across social platforms."
+      content="Postmerce to private-first system do przygotowania, kolejkowania i kontrolowania publikacji video z targetami per platforma."
     />
   </head>
   <body>
@@ -24,34 +81,118 @@ import "../styles/site.css";
       </nav>
 
       <section class="hero">
-        <p class="eyebrow">One video. Many platforms. Controlled publishing.</p>
-        <h1>Postmerce turns one social asset into platform-specific posts.</h1>
+        <p class="eyebrow">Private-first publishing control center</p>
+        <h1>Jeden materiał. Osobne decyzje dla każdej platformy.</h1>
         <p class="lead">
-          A lean publishing system for uploading video, preparing per-platform captions,
-          scheduling jobs and tracking every target without SaaS overhead.
+          Postmerce pomaga wgrać wideo, przygotować bazowy post, dopasować
+          targety per platforma, wysłać je do kolejki i sprawdzić status każdej
+          publikacji bez udawania, że dystrybucja contentu jest jednym przyciskiem.
         </p>
         <div class="hero-actions">
-          <a class="button" href="mailto:support@postmerce.pl">Contact support</a>
-          <a class="button secondary" href="https://staging.postmerce.pl">Private staging</a>
+          <a class="button" href="mailto:support@postmerce.pl">Porozmawiajmy o early access</a>
+          <a class="button secondary" href="https://staging.postmerce.pl">Prywatny staging</a>
+        </div>
+        <div class="status-strip" aria-label="Product status">
+          <strong>Status:</strong>
+          <span>
+            najpierw prywatny system Triple Muffin, potem produkt dla zespołów,
+            które publikują regularnie i potrzebują kontroli procesu.
+          </span>
         </div>
       </section>
 
-      <section class="feature-grid" aria-label="Product pillars">
-        <article>
-          <span>01</span>
-          <h2>Private first</h2>
-          <p>Built for Wojtek's own publishing loop before customer accounts, teams or billing.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <h2>Queue based</h2>
-          <p>HTTP requests create jobs. Workers publish, retry and keep platform failures isolated.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h2>SaaS ready</h2>
-          <p>The core stays clean enough to grow into a product when the private loop proves value.</p>
-        </article>
+      <section class="section split" aria-label="Problem">
+        <div>
+          <p class="eyebrow">Problem</p>
+          <h2>Publikacja to proces, nie moment wrzucenia pliku.</h2>
+          <p>
+            Ten sam materiał inaczej działa na YouTube Shorts, LinkedIn,
+            Instagramie, Facebooku i TikToku. Inny tytuł, inny opis, inny rytm,
+            inne konto, inna prywatność, inne limity API i inne miejsce, w którym
+            coś może pójść nie tak.
+          </p>
+          <p>
+            Postmerce porządkuje ten proces od strony operacyjnej: media,
+            warianty platformowe, kolejka, worker, statusy, retry i historia.
+          </p>
+        </div>
+        <aside class="insight-card">
+          <span>Główna zasada</span>
+          <h3>Nie publikuj szybciej chaosu. Publikuj z kontrolą.</h3>
+          <p>
+            Szybkość ma sens dopiero wtedy, gdy wiesz, co zostało przygotowane,
+            gdzie ma pójść, na jakim koncie, w jakim stanie i co zrobić, gdy
+            platforma odmówi publikacji.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" aria-label="Workflow">
+        <p class="eyebrow">Workflow</p>
+        <h2>Od jednego pliku do osobnego statusu każdego targetu.</h2>
+        <div class="process-grid">
+          {
+            workflowSteps.map((step, index) => (
+              <article>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section status-panel" aria-label="Current product status">
+        <div>
+          <p class="eyebrow">Product truth</p>
+          <h2>Budujemy produkt, ale nie przeskakujemy dowodu.</h2>
+          <p>
+            Postmerce jest już działającym prywatnym systemem. Publiczny SaaS
+            przyjdzie dopiero wtedy, gdy core publikowania będzie sprawdzony na
+            realnym, powtarzalnym loopie.
+          </p>
+        </div>
+        <div class="status-grid">
+          {
+            statusItems.map((item) => (
+              <article>
+                <h3>{item.label}</h3>
+                <p>{item.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section" aria-label="Audience">
+        <p class="eyebrow">Dla kogo</p>
+        <h2>Dla ludzi, którzy traktują dystrybucję jak system.</h2>
+        <div class="feature-grid">
+          {
+            audienceCards.map((card, index) => (
+              <article>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="section final-cta" aria-label="Early access">
+        <p class="eyebrow">Early access</p>
+        <h2>Chcesz zobaczyć Postmerce, gdy prywatny loop będzie gotowy do pokazania?</h2>
+        <p>
+          Napisz, jeżeli publikujesz dużo video, masz kilka platform do obsłużenia
+          i chcesz rozmawiać o narzędziu, które zaczyna od kontroli procesu, a nie
+          od obietnicy automatyzacji wszystkiego.
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="mailto:support@postmerce.pl">support@postmerce.pl</a>
+          <a class="button secondary" href="/privacy">Zobacz zasady prywatności</a>
+        </div>
       </section>
     </main>
   </body>

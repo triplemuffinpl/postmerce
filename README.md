@@ -37,6 +37,13 @@ applications, OAuth, reviews and Postmerce connection is in:
 
 [docs/PLATFORM_ONBOARDING_PL.md](docs/PLATFORM_ONBOARDING_PL.md)
 
+## Marketing and Content
+
+The current positioning, website copy, content plan, ready-to-use assets and
+claim guardrails are in:
+
+[docs/marketing/README.md](docs/marketing/README.md)
+
 ## First Local Run
 
 ```powershell
