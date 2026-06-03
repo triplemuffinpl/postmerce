@@ -36,24 +36,36 @@ function calendarDays(monthStart: Date): Date[] {
   });
 }
 
+function targetCalendarLabel(target: TargetControlItem): string {
+  if (target.status === "draft") {
+    return "Szkic";
+  }
+
+  const date = target.scheduledAt ?? target.postScheduledAt;
+  if (date) {
+    const d = new Date(date);
+    return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+
+  const meta = targetStatusMeta[target.status];
+  return meta ? meta.label : target.status;
+}
+
 function targetPill(target: TargetControlItem): string {
   const meta = targetStatusMeta[target.status];
   const colorClass = meta ? meta.colorClass : "status-gray";
   const title = escapeHtml(target.postTitle);
   const platformName = platformLabel(target.platform);
   const statusLabel = meta ? meta.label : target.status;
-  const account = escapeHtml(target.accountDisplayName ?? target.accountUsername ?? (target.socialAccountId ? `Konto #${target.socialAccountId}` : "auto"));
   const timeStr = formatDateTime(target.scheduledAt ?? target.postScheduledAt ?? target.createdAt);
-  
-  // Format a beautiful multiline tooltip content
-  const tooltip = `${target.postTitle}\nPlatforma: ${platformName}\nKonto: ${account}\nHarmonogram: ${timeStr}\nStatus: ${statusLabel}`;
+  const label = escapeHtml(targetCalendarLabel(target));
 
   return `
     <a class="calendar-target-pill platform-${target.platform} status-${target.status}" 
        href="/posts/${target.postId}" 
-       data-tooltip="${escapeHtml(tooltip)}">
+       title="${title} (${platformName} - ${statusLabel} o ${timeStr})">
       <span class="platform-dot-icon">${platformIcon(target.platform, 12, 12)}</span>
-      <span class="target-title">${title}</span>
+      <span class="target-title">${label}</span>
       <span class="status-dot-indicator ${colorClass}"></span>
     </a>
   `;

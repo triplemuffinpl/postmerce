@@ -1610,7 +1610,12 @@ p {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  overflow: hidden;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+
+.calendar-day-items::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .calendar-target-pill {
@@ -1627,42 +1632,12 @@ p {
   min-width: 0;
   transition: var(--transition);
   box-shadow: none;
-  position: relative;
 }
 
 .calendar-target-pill:hover {
   background: var(--panel-hover);
 }
 
-/* Premium CSS-only Hover Tooltip Card */
-.calendar-target-pill::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 130%;
-  left: 50%;
-  transform: translate(-50%, 6px) scale(0.95);
-  background: var(--ink);
-  color: var(--bg);
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  font-size: 0.74rem;
-  font-weight: 550;
-  line-height: 1.45;
-  white-space: pre-line;
-  text-align: left;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-lg);
-  z-index: 1000;
-  width: max-content;
-  max-width: 220px;
-}
-
-.calendar-target-pill:hover::after {
-  opacity: 1;
-  transform: translate(-50%, 0) scale(1);
-}
 
 
 .calendar-target-pill .target-title {
@@ -1716,16 +1691,7 @@ p {
   border-color: hsl(var(--primary-hue), var(--primary-saturation), 20%);
 }
 
-.calendar-day {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  display: grid;
-  gap: 10px;
-  min-height: 150px;
-  padding: 10px;
-  transition: var(--transition);
-}
+
 
 .calendar-day.is-today {
   border-color: var(--primary);
