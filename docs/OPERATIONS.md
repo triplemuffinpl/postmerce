@@ -75,7 +75,7 @@ GET /jobs
 Current staging host:
 
 ```text
-https://postmerce-91-99-63-80.sslip.io
+https://staging.postmerce.pl
 ```
 
 Deploy from a clean committed local tree:
@@ -84,7 +84,13 @@ Deploy from a clean committed local tree:
 .\scripts\deploy-vps.ps1
 ```
 
-The app runs in Docker Compose under `/srv/apps/postmerce`; runtime data lives under `/srv/data/postmerce`.
+The app runs on the second Hetzner VPS in Docker Compose under
+`/srv/apps/postmerce`; runtime data lives under `/srv/data/postmerce`.
+Administration goes through Tailscale SSH:
+
+```powershell
+tailscale ssh ops@tm-levelsio-cax11
+```
 
 ## Logs
 

@@ -1,7 +1,7 @@
 param(
-  [string]$HostName = "91.99.63.80",
+  [string]$HostName = "100.109.177.115",
   [string]$User = "ops",
-  [string]$KeyPath = "$env:USERPROFILE\.ssh\hetzner_tm_test",
+  [string]$KeyPath = "",
   [string]$AppDir = "/srv/apps/postmerce",
   [string]$DataDir = "/srv/data/postmerce"
 )
@@ -12,6 +12,10 @@ $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $commit = (git -C $repoRoot rev-parse HEAD).Trim()
 $archive = Join-Path ([System.IO.Path]::GetTempPath()) "postmerce-$commit.tar.gz"
 $remoteArchive = "/tmp/postmerce-$commit.tar.gz"
+$sshArgs = @("-o", "StrictHostKeyChecking=no")
+if ($KeyPath) {
+  $sshArgs = @("-i", $KeyPath) + $sshArgs
+}
 
 $dirty = git -C $repoRoot status --porcelain
 if ($dirty) {
@@ -20,7 +24,7 @@ if ($dirty) {
 
 git -C $repoRoot archive --format=tar.gz --output=$archive HEAD
 
-scp -i $KeyPath $archive "${User}@${HostName}:$remoteArchive"
+scp @sshArgs $archive "${User}@${HostName}:$remoteArchive"
 
 $remoteScript = @'
 set -euo pipefail
@@ -41,7 +45,7 @@ cd "$APP_DIR"
 if [ ! -f .env.server ]; then
   cat > .env.server <<EOF
 APP_ENV=staging
-APP_URL=https://postmerce-91-99-63-80.sslip.io
+APP_URL=https://staging.postmerce.pl
 APP_TIMEZONE=Europe/Warsaw
 APP_SECRET=$(openssl rand -hex 32)
 ENCRYPTION_KEY=$(openssl rand -base64 32)
@@ -70,7 +74,7 @@ ENABLE_TIKTOK=false
 
 YOUTUBE_CLIENT_ID=
 YOUTUBE_CLIENT_SECRET=
-YOUTUBE_REDIRECT_URI=https://postmerce-91-99-63-80.sslip.io/oauth/youtube/callback
+YOUTUBE_REDIRECT_URI=https://staging.postmerce.pl/oauth/youtube/callback
 YOUTUBE_UPLOAD_CATEGORY_ID=22
 EOF
   chmod 600 .env.server
@@ -97,10 +101,10 @@ $remoteScriptRemotePath = "/tmp/postmerce-deploy-$commit.sh"
   [System.Text.UTF8Encoding]::new($false)
 )
 
-scp -i $KeyPath $remoteScriptPath "${User}@${HostName}:$remoteScriptRemotePath"
+scp @sshArgs $remoteScriptPath "${User}@${HostName}:$remoteScriptRemotePath"
 
 $remoteDeployCommand = "bash $remoteScriptRemotePath; status=`$?; rm -f $remoteScriptRemotePath; exit `$status"
-ssh -i $KeyPath "${User}@${HostName}" $remoteDeployCommand
+ssh @sshArgs "${User}@${HostName}" $remoteDeployCommand
 
 Remove-Item -LiteralPath $archive -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $remoteScriptPath -Force -ErrorAction SilentlyContinue

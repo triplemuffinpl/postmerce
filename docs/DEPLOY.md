@@ -11,13 +11,15 @@ Deployment target: VPS behind Caddy or nginx.
 - worker process, currently via Docker Compose service on staging.
 - FFmpeg/FFprobe installed for media stages.
 
-The current staging deploy uses Docker Compose on `tm-test-cx33-1`:
+The current staging deploy uses Docker Compose on the second Hetzner VPS
+`tm-levelsio-cax11`:
 
 - app directory: `/srv/apps/postmerce`
 - data directory: `/srv/data/postmerce`
 - internal app port: `4310`
 - host bind port: `127.0.0.1:4501`
-- test host: `https://postmerce-91-99-63-80.sslip.io`
+- staging host: `https://staging.postmerce.pl`
+- SSH: Tailscale address `100.109.177.115`, user `ops`
 
 ## First VPS Deploy Checklist
 
@@ -47,10 +49,18 @@ the `app` and `worker` Compose services.
 
 ## Caddy Route
 
-The test host should reverse proxy to:
+The staging host reverse proxies to:
 
 ```text
 127.0.0.1:4501
 ```
 
-Use proxy-level Basic Auth for the private panel until SaaS auth exists.
+Use proxy-level Basic Auth for the private panel until SaaS auth exists. Keep
+`/oauth/*` reachable without Basic Auth because platform OAuth callbacks return
+through the user's browser and are protected by signed `state`.
+
+The current second VPS firewall allows public HTTPS only from Cloudflare IP
+ranges. With the current Caddy internal certificate setup, the Cloudflare DNS
+record for `staging.postmerce.pl` should be proxied and Cloudflare SSL/TLS mode
+should be `Full`, not `Flexible`. Use `Full (strict)` only after adding a
+Cloudflare Origin Certificate or DNS-challenge certificate automation.
