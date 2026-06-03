@@ -16,7 +16,7 @@ const workflowSteps = [
   },
   {
     title: "Wyślij do kolejki",
-    text: "HTTP nie publikuje bezpośrednio. Targety zamieniają się w zadania, a worker publikuje albo robi kontrolowany dry-run.",
+    text: "Targety zamieniają się w zadania. Worker publikuje albo robi kontrolowany dry-run poza requestem HTTP.",
   },
   {
     title: "Sprawdź status",
@@ -28,9 +28,16 @@ const workflowSteps = [
   },
 ];
 
+const targetRows = [
+  { platform: "YouTube Shorts", account: "Triple Muffin", status: "ready", tone: "green" },
+  { platform: "LinkedIn", account: "Wojtek", status: "scheduled", tone: "blue" },
+  { platform: "Instagram Reels", account: "Triple Muffin", status: "review", tone: "yellow" },
+  { platform: "TikTok", account: "roadmap", status: "api review", tone: "muted" },
+];
+
 const statusItems = [
   {
-    label: "Gotowe dziś",
+    label: "Gotowe dzisiaj",
     text: "Media, posty, targety per platforma, kolejka PostgreSQL, worker, dry-run, kalendarz, control center i konta.",
   },
   {
@@ -45,16 +52,39 @@ const statusItems = [
 
 const audienceCards = [
   {
-    title: "Dla operatorów contentu",
+    title: "Operatorzy contentu",
     text: "Dla ludzi, którzy publikują dużo i muszą pilnować wersji, platform, kont, terminów oraz błędów.",
   },
   {
-    title: "Dla founderów i małych zespołów",
+    title: "Founderzy i małe zespoły",
     text: "Dla osób, które nie potrzebują jeszcze wielkiego social suite, ale potrzebują porządku w dystrybucji.",
   },
   {
-    title: "Dla agencji",
+    title: "Agencje",
     text: "Dla zespołów, które chcą zamienić ręczne publikowanie w czytelny proces z targetami, statusami i historią.",
+  },
+];
+
+const faqs = [
+  {
+    question: "Czy Postmerce jest już publicznym SaaS-em?",
+    answer:
+      "Nie. Obecnie to private-first system Triple Muffin w aktywnym rozwoju. Publiczny SaaS ma sens dopiero po potwierdzeniu core loopa publikacji.",
+  },
+  {
+    question: "Czy Postmerce publikuje na wszystkich platformach?",
+    answer:
+      "System obsługuje targety per platforma, kolejkę, worker i statusy. YouTube jest pierwszym adapterem do kontrolowanego live testu. Pozostałe platformy są na roadmapie i wymagają review oraz implementacji adapterów.",
+  },
+  {
+    question: "Czym to się różni od kalendarza social media?",
+    answer:
+      "Kalendarz pokazuje, kiedy coś ma wyjść. Postmerce trzyma cały proces: media, bazowy post, platformowe targety, konta, statusy, retry i błędy.",
+  },
+  {
+    question: "Czy Postmerce tworzy copy?",
+    answer:
+      "Postmerce jest systemem publikacji. Copy może przychodzić z Content OS, gdzie osobno trzymamy metody, głos, źródła i rekomendacje.",
   },
 ];
 ---
@@ -66,39 +96,76 @@ const audienceCards = [
     <title>Postmerce - jeden materiał, osobne publikacje, pełna kontrola</title>
     <meta
       name="description"
-      content="Postmerce to private-first system do przygotowania, kolejkowania i kontrolowania publikacji video z targetami per platforma."
+      content="Postmerce to private-first system do przygotowania, kolejkowania i kontrolowania publikacji video na wielu platformach."
     />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
   </head>
   <body>
     <main class="page-shell">
       <nav class="topbar" aria-label="Primary">
-        <a class="brand" href="/">Postmerce</a>
+        <a class="brand" href="/" aria-label="Postmerce home">
+          <span class="brand-mark">P</span>
+          <span>Postmerce</span>
+        </a>
         <div class="nav-links">
+          <a href="#workflow">Workflow</a>
+          <a href="#status">Status</a>
           <a href="/privacy">Privacy</a>
           <a href="/terms">Terms</a>
-          <a href="/data-deletion">Data deletion</a>
         </div>
       </nav>
 
-      <section class="hero">
-        <p class="eyebrow">Private-first publishing control center</p>
-        <h1>Jeden materiał. Osobne decyzje dla każdej platformy.</h1>
-        <p class="lead">
-          Postmerce pomaga wgrać wideo, przygotować bazowy post, dopasować
-          targety per platforma, wysłać je do kolejki i sprawdzić status każdej
-          publikacji bez udawania, że dystrybucja contentu jest jednym przyciskiem.
-        </p>
-        <div class="hero-actions">
-          <a class="button" href="mailto:support@postmerce.pl">Porozmawiajmy o early access</a>
-          <a class="button secondary" href="https://staging.postmerce.pl">Prywatny staging</a>
-        </div>
-        <div class="status-strip" aria-label="Product status">
-          <strong>Status:</strong>
-          <span>
-            najpierw prywatny system Triple Muffin, potem produkt dla zespołów,
+      <section class="hero hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Private-first publishing control center</p>
+          <h1>Jeden materiał. Osobne decyzje dla każdej platformy.</h1>
+          <p class="lead">
+            Postmerce pomaga wgrać wideo, przygotować bazowy post, dopasować
+            targety per platforma, wysłać je do kolejki i sprawdzić status każdej
+            publikacji bez udawania, że dystrybucja contentu jest jednym przyciskiem.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="mailto:support@postmerce.pl">Porozmawiajmy o early access</a>
+            <a class="button secondary" href="https://staging.postmerce.pl">Prywatny staging</a>
+          </div>
+          <p class="status-note">
+            Status: najpierw prywatny system Triple Muffin, potem produkt dla zespołów,
             które publikują regularnie i potrzebują kontroli procesu.
-          </span>
+          </p>
         </div>
+
+        <aside class="product-preview" aria-label="Postmerce product preview">
+          <div class="preview-top">
+            <span>Control center</span>
+            <strong>dry-run first</strong>
+          </div>
+          <div class="asset-card">
+            <div>
+              <span class="mini-label">source video</span>
+              <h2>launch_clip_001.mp4</h2>
+            </div>
+            <p>00:47 · vertical · ready</p>
+          </div>
+          <div class="target-list">
+            {
+              targetRows.map((row) => (
+                <div class="target-row">
+                  <div>
+                    <strong>{row.platform}</strong>
+                    <span>{row.account}</span>
+                  </div>
+                  <span class={`target-status ${row.tone}`}>{row.status}</span>
+                </div>
+              ))
+            }
+          </div>
+          <div class="queue-strip">
+            <span>queued jobs</span>
+            <strong>12</strong>
+            <span>last worker run</span>
+            <strong>14:12</strong>
+          </div>
+        </aside>
       </section>
 
       <section class="section split" aria-label="Problem">
@@ -127,7 +194,7 @@ const audienceCards = [
         </aside>
       </section>
 
-      <section class="section" aria-label="Workflow">
+      <section class="section" id="workflow" aria-label="Workflow">
         <p class="eyebrow">Workflow</p>
         <h2>Od jednego pliku do osobnego statusu każdego targetu.</h2>
         <div class="process-grid">
@@ -143,7 +210,7 @@ const audienceCards = [
         </div>
       </section>
 
-      <section class="section status-panel" aria-label="Current product status">
+      <section class="section status-panel" id="status" aria-label="Current product status">
         <div>
           <p class="eyebrow">Product truth</p>
           <h2>Budujemy produkt, ale nie przeskakujemy dowodu.</h2>
@@ -181,6 +248,21 @@ const audienceCards = [
         </div>
       </section>
 
+      <section class="section faq-section" aria-label="FAQ">
+        <p class="eyebrow">FAQ</p>
+        <h2>Krótko i bez launchowego dymu.</h2>
+        <div class="faq-list">
+          {
+            faqs.map((item) => (
+              <article>
+                <h3>{item.question}</h3>
+                <p>{item.answer}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
       <section class="section final-cta" aria-label="Early access">
         <p class="eyebrow">Early access</p>
         <h2>Chcesz zobaczyć Postmerce, gdy prywatny loop będzie gotowy do pokazania?</h2>
@@ -194,6 +276,15 @@ const audienceCards = [
           <a class="button secondary" href="/privacy">Zobacz zasady prywatności</a>
         </div>
       </section>
+
+      <footer class="footer">
+        <span>Postmerce by Triple Muffin</span>
+        <div>
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/data-deletion">Data deletion</a>
+        </div>
+      </footer>
     </main>
   </body>
 </html>
