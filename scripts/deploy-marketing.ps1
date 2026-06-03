@@ -14,8 +14,8 @@ if ($KeyPath) {
 
 Write-Host "Building marketing website..."
 # Run local build
-$buildResult = Start-Process npm -ArgumentList "run", "build", "-w", "@postmerce/marketing" -WorkingDirectory $repoRoot -NoNewWindow -PassThru -Wait
-if ($buildResult.ExitCode -ne 0) {
+& npm run build -w @postmerce/marketing
+if ($LASTEXITCODE -ne 0) {
   throw "Failed to build @postmerce/marketing"
 }
 
