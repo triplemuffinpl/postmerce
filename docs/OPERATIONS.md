@@ -92,6 +92,27 @@ Administration goes through Tailscale SSH:
 tailscale ssh ops@tm-levelsio-cax11
 ```
 
+## Public Marketing Site
+
+The static Astro marketing site is served from:
+
+```text
+/srv/apps/postmerce-marketing/current
+```
+
+Local build:
+
+```powershell
+npm run build -w @postmerce/marketing
+```
+
+Current public pages needed for platform review:
+
+- `https://postmerce.pl/`
+- `https://postmerce.pl/privacy`
+- `https://postmerce.pl/terms`
+- `https://postmerce.pl/data-deletion`
+
 ## Logs
 
 Never log secrets. Platform events and app logs should store redacted payloads.

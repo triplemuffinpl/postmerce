@@ -1,0 +1,79 @@
+---
+import SiteShell from "../components/SiteShell.astro";
+import "../styles/site.css";
+---
+
+<SiteShell
+  title="Privacy Policy"
+  description="How Postmerce handles connected social accounts, uploaded media, publishing metadata and support requests."
+  eyebrow="Legal"
+>
+  <section class="legal-prose">
+    <p><strong>Last updated:</strong> June 3, 2026</p>
+
+    <h2>Who operates Postmerce</h2>
+    <p>
+      Postmerce is operated by Triple Muffin. You can contact us at
+      <a href="mailto:privacy@postmerce.pl">privacy@postmerce.pl</a> for privacy
+      questions and <a href="mailto:support@postmerce.pl">support@postmerce.pl</a>
+      for product support.
+    </p>
+
+    <h2>What Postmerce does</h2>
+    <p>
+      Postmerce lets authorized users upload video assets, prepare platform-specific
+      captions and settings, schedule publishing jobs and review publication status
+      across connected social accounts.
+    </p>
+
+    <h2>Data we process</h2>
+    <ul>
+      <li>Account identity returned by connected platforms, such as channel, page or profile identifiers.</li>
+      <li>OAuth tokens needed to publish on accounts explicitly connected by the user.</li>
+      <li>Uploaded media, thumbnails, metadata, captions, hashtags, schedules and publishing options.</li>
+      <li>Publishing status, error codes, retry information and sanitized API responses.</li>
+      <li>Support messages sent to Postmerce email addresses.</li>
+    </ul>
+
+    <h2>How we use data</h2>
+    <p>
+      We use data only to provide the publishing workflow, maintain the service,
+      troubleshoot publishing failures, improve reliability and respond to user
+      requests. We do not sell personal data.
+    </p>
+
+    <h2>Social platform access</h2>
+    <p>
+      Postmerce connects to social platforms through OAuth. Users choose which
+      accounts to connect and can revoke platform access in the platform settings.
+      Tokens are stored encrypted and are not logged.
+    </p>
+
+    <h2>Data sharing</h2>
+    <p>
+      Postmerce sends content and publishing metadata to the social platforms selected
+      by the user. We may use infrastructure providers for hosting, DNS, security,
+      email and storage. These providers process data only as needed to run the service.
+    </p>
+
+    <h2>Retention and deletion</h2>
+    <p>
+      Users can request deletion of connected account data, OAuth tokens, uploaded
+      media and publishing metadata. See <a href="/data-deletion">Data deletion</a>
+      for instructions.
+    </p>
+
+    <h2>Security</h2>
+    <p>
+      We use encrypted transport, encrypted OAuth token storage, private server access
+      and least-privilege platform scopes where possible. No internet service is risk
+      free, but we design Postmerce to avoid exposing secrets and unnecessary data.
+    </p>
+
+    <h2>Changes</h2>
+    <p>
+      We may update this policy as Postmerce evolves. The date above shows the latest
+      published version.
+    </p>
+  </section>
+</SiteShell>

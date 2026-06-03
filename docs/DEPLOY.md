@@ -21,6 +21,13 @@ The current staging deploy uses Docker Compose on the second Hetzner VPS
 - staging host: `https://staging.postmerce.pl`
 - SSH: Tailscale address `100.109.177.115`, user `ops`
 
+The public marketing site is static Astro output served by Caddy:
+
+- build output: `apps/marketing/dist`
+- server path: `/srv/apps/postmerce-marketing/current`
+- public host: `https://postmerce.pl`
+- `www.postmerce.pl` redirects to `https://postmerce.pl`
+
 ## First VPS Deploy Checklist
 
 1. Read the VPS source of truth in `vps-tm-test-cx33-1/VPS.md`.
@@ -64,3 +71,13 @@ ranges. With the current Caddy internal certificate setup, the Cloudflare DNS
 record for `staging.postmerce.pl` should be proxied and Cloudflare SSL/TLS mode
 should be `Full`, not `Flexible`. Use `Full (strict)` only after adding a
 Cloudflare Origin Certificate or DNS-challenge certificate automation.
+
+Cloudflare DNS records for the second VPS:
+
+```text
+A      staging   178.104.199.11   Proxied
+A      @         178.104.199.11   Proxied
+CNAME  www       postmerce.pl     Proxied
+```
+
+Keep mail records DNS-only.

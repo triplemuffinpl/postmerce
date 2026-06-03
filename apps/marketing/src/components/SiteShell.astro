@@ -1,0 +1,39 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  eyebrow?: string;
+}
+
+const { title, description, eyebrow = "Postmerce" } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+  </head>
+  <body>
+    <main class="page-shell">
+      <nav class="topbar" aria-label="Primary">
+        <a class="brand" href="/">Postmerce</a>
+        <div class="nav-links">
+          <a href="/privacy">Privacy</a>
+          <a href="/terms">Terms</a>
+          <a href="/data-deletion">Data deletion</a>
+        </div>
+      </nav>
+
+      <section class="hero compact">
+        <p class="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p class="lead">{description}</p>
+      </section>
+
+      <slot />
+    </main>
+  </body>
+</html>
