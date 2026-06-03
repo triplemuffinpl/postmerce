@@ -8,6 +8,7 @@ import {
 } from "../db/account-repository.js";
 import type { AccountInfoResult, SocialAccountRecord, TokenRefreshResult } from "../domain.js";
 import { createOAuthState, verifyOAuthState } from "./oauth-state.js";
+import { logger } from "./logger.js";
 import { decryptSecret, encryptSecret } from "./secret-crypto.js";
 
 const youtubeScopes = [
@@ -44,6 +45,23 @@ const channelResponseSchema = z.object({
       })
     })
   )
+});
+
+const googleApiErrorSchema = z.object({
+  error: z
+    .object({
+      code: z.number().optional(),
+      message: z.string().optional(),
+      status: z.string().optional(),
+      errors: z
+        .array(
+          z.object({
+            reason: z.string().optional()
+          })
+        )
+        .optional()
+    })
+    .optional()
 });
 
 export interface AccessTokenResult {
@@ -157,6 +175,9 @@ async function fetchYouTubeChannel(accessToken: string): Promise<AccountInfoResu
   const payload = await readJson(response);
 
   if (!response.ok) {
+    const parsedError = googleApiErrorSchema.safeParse(payload);
+    const providerError = parsedError.success ? parsedError.data.error : undefined;
+
     return {
       ok: false,
       platformUserId: null,
@@ -165,8 +186,12 @@ async function fetchYouTubeChannel(accessToken: string): Promise<AccountInfoResu
       avatarUrl: null,
       accountType: null,
       redactedRawResponse: {
-        status: response.status,
-        reason: "channel_fetch_failed"
+        reason: "channel_fetch_failed",
+        httpStatus: response.status,
+        providerCode: providerError?.code ?? null,
+        providerStatus: providerError?.status ?? null,
+        providerReason: providerError?.errors?.[0]?.reason ?? null,
+        providerMessage: providerError?.message ?? null
       }
     };
   }
@@ -200,6 +225,47 @@ async function fetchYouTubeChannel(accessToken: string): Promise<AccountInfoResu
       title: channel.snippet.title ?? null,
       customUrl: channel.snippet.customUrl ?? null
     }
+  };
+}
+
+function channelLookupFailure(accountInfo: AccountInfoResult): Pick<YouTubeOAuthCallbackResult, "errorCode" | "errorMessage"> {
+  const reason = accountInfo.redactedRawResponse.reason;
+  const providerReason = accountInfo.redactedRawResponse.providerReason;
+  const providerStatus = accountInfo.redactedRawResponse.providerStatus;
+  const providerMessage =
+    typeof accountInfo.redactedRawResponse.providerMessage === "string"
+      ? accountInfo.redactedRawResponse.providerMessage.toLowerCase()
+      : "";
+
+  if (
+    providerReason === "accessNotConfigured" ||
+    providerStatus === "SERVICE_DISABLED" ||
+    providerMessage.includes("has not been used") ||
+    providerMessage.includes("is disabled")
+  ) {
+    return {
+      errorCode: "oauth_youtube_api_unavailable",
+      errorMessage: "YouTube Data API v3 is not enabled or available for this Google Cloud project."
+    };
+  }
+
+  if (providerReason === "insufficientPermissions") {
+    return {
+      errorCode: "oauth_youtube_permissions_missing",
+      errorMessage: "Google did not grant the permissions required to read the YouTube channel."
+    };
+  }
+
+  if (reason === "channel_missing") {
+    return {
+      errorCode: "oauth_youtube_channel_missing",
+      errorMessage: "No YouTube channel is available for this Google account yet. If it was just created, wait a few minutes and retry."
+    };
+  }
+
+  return {
+    errorCode: "oauth_youtube_channel_lookup_failed",
+    errorMessage: "YouTube channel lookup failed. Check the Google Cloud API configuration and retry."
   };
 }
 
@@ -252,11 +318,14 @@ export async function completeYouTubeOAuthCallback(
     const accountInfo = await fetchYouTubeChannel(tokenResponse.access_token);
 
     if (!accountInfo.ok || !accountInfo.platformUserId) {
+      logger.warn("oauth", "YouTube channel lookup failed", accountInfo.redactedRawResponse);
+      const failure = channelLookupFailure(accountInfo);
+
       return {
         ok: false,
         account: null,
-        errorCode: "oauth_youtube_channel_missing",
-        errorMessage: "YouTube channel could not be read for this Google account."
+        errorCode: failure.errorCode,
+        errorMessage: failure.errorMessage
       };
     }
 
