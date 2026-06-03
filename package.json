@@ -12,7 +12,7 @@
     "dev:app": "npm run dev -w @postmerce/app",
     "dev:marketing": "npm run dev -w @postmerce/marketing",
     "build": "npm run build -w @postmerce/app && npm run build -w @postmerce/marketing",
-    "typecheck": "npm run typecheck -w @postmerce/app && npm run typecheck -w @postmerce/marketing",
+    "typecheck": "npm run typecheck -w @postmerce/app && npm run typecheck -w @postmerce/marketing && npm run typecheck -w @postmerce/motion",
     "lint": "eslint .",
     "check": "npm run typecheck && npm run lint",
     "migrate": "npm run migrate -w @postmerce/app",
@@ -23,6 +23,7 @@
     "@eslint/js": "^9.28.0",
     "@types/node": "^22.15.29",
     "eslint": "^9.28.0",
+    "tslib": "^2.8.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.33.1"
   }

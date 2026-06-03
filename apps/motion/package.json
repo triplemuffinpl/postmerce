@@ -1,0 +1,24 @@
+{
+  "name": "@postmerce/motion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "still": "remotion still src/index.ts ProductShowcase out/product-showcase-still.png --frame=120 --scale=0.35",
+    "render": "remotion render src/index.ts ProductShowcase out/postmerce-product-showcase.mp4"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "remotion": "^4.0.471",
+    "tslib": "^2.8.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.471",
+    "@types/react": "^19.1.6",
+    "@types/react-dom": "^19.1.5"
+  }
+}

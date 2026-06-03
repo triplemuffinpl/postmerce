@@ -12,15 +12,15 @@ export function dashboardPage(options: DashboardPageOptions): string {
     active: "dashboard",
     body: `
       <section class="page-header">
-        <p class="eyebrow">Prywatne centrum dystrybucji</p>
-        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Dzień dobry, Wojtek</h1>
+        <p class="eyebrow">Centrum publikacji</p>
+        <h1 style="font-weight: 800; letter-spacing: -0.03em;">Witaj w Postmerce</h1>
         <p class="lead">
-          Postmerce to Twój zautomatyzowany panel dystrybucji wideo. Prześlij jeden plik, spersonalizuj opisy i rozpropaguj go asynchronicznie na wszystkie platformy społecznościowe.
+          Przygotuj jeden materiał, rozbij go na platformowe targety i kontroluj
+          każde wyjście z poziomu jednego panelu: konto, opis, termin, kolejkę i status.
         </p>
       </section>
 
       <section class="metric-grid" aria-label="Status systemu Postmerce">
-        <!-- Tryb działania card -->
         <article>
           <div class="metric-icon">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -28,12 +28,11 @@ export function dashboardPage(options: DashboardPageOptions): string {
             </svg>
           </div>
           <div class="metric-content">
-            <span>Tryb operacyjny</span>
-            <strong>Testowy (Dry-run)</strong>
+            <span>Kontrola publikacji</span>
+            <strong>Targety per platforma</strong>
           </div>
         </article>
-        
-        <!-- Kolejka zadań card -->
+
         <article>
           <div class="metric-icon" style="color: var(--warning); background: var(--warning-soft);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -42,11 +41,10 @@ export function dashboardPage(options: DashboardPageOptions): string {
           </div>
           <div class="metric-content">
             <span>Kolejka zleceń</span>
-            <strong>Baza PostgreSQL</strong>
+            <strong>Publikowanie poza requestem</strong>
           </div>
         </article>
-        
-        <!-- Stan interfejsu card -->
+
         <article>
           <div class="metric-icon" style="color: var(--success); background: var(--success-soft);">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -54,8 +52,8 @@ export function dashboardPage(options: DashboardPageOptions): string {
             </svg>
           </div>
           <div class="metric-content">
-            <span>Architektura UI</span>
-            <strong>Nowoczesny SSR Shell</strong>
+            <span>Statusy i reakcje</span>
+            <strong>Osobna historia targetu</strong>
           </div>
         </article>
       </section>
@@ -63,8 +61,10 @@ export function dashboardPage(options: DashboardPageOptions): string {
       <section class="panel">
         <div class="panel-header" style="margin-bottom: 24px;">
           <div style="display: grid; gap: 4px;">
-            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Kanały Dystrybucji</h2>
-            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">Status integracji i dostępność platform społecznościowych w Postmerce.</p>
+            <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">Kanały dystrybucji</h2>
+            <p style="color: var(--muted); font-size: 0.85rem; margin: 0; font-weight: 500;">
+              Platformy, konta i tryby publikacji, które możesz kontrolować w Postmerce.
+            </p>
           </div>
           <a class="text-link" style="font-weight: 700;" href="/accounts">Zarządzaj kontami</a>
         </div>

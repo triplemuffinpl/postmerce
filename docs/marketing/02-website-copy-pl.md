@@ -1,98 +1,56 @@
-# Postmerce - komplet copy na strone
-
-Ten dokument zawiera copy na publiczny landing, warianty hero, mikrocopy, FAQ i teksty bezpieczne pod platform review. Aktualna strona powinna byc szczera: Postmerce jest private-first produktem w aktywnym rozwoju, a publiczny SaaS nie jest jeszcze otwarty.
+# Postmerce - publiczne copy na stronę
 
 ## Meta
 
-### PL
-
 Title:
 
-> Postmerce - jeden material, osobne publikacje, pelna kontrola
+> Postmerce - multi-platform publishing control center
 
 Description:
 
-> Postmerce to private-first system do przygotowania, kolejkowania i kontrolowania publikacji video na wielu platformach.
-
-### EN, gdy trzeba pod review
-
-Title:
-
-> Postmerce - private-first social publishing control
-
-Description:
-
-> Postmerce lets authorized users upload video, prepare platform-specific publishing targets, queue jobs, and review target-level status.
+> Postmerce pomaga przygotować, zaplanować i kontrolować publikacje video na wielu
+> platformach z targetami, kolejką i statusem każdego wyjścia.
 
 ## Nawigacja
 
-- Brand: Postmerce
+- Brand: `Postmerce`
+- Workflow
+- Product
+- FAQ
 - Privacy
 - Terms
-- Data deletion
-- Optional future: Early access
 
-Legal pages zostaja po angielsku, bo pracuja tez pod platform review.
-
-## Hero - wersja glowna
+## Hero
 
 Eyebrow:
 
-> Private-first publishing control center
+> Publishing control center
 
 H1:
 
-> Jeden material. Osobne decyzje dla kazdej platformy.
+> Jeden film. Osobna publikacja dla każdej platformy.
 
 Lead:
 
-> Postmerce pomaga wgrac wideo, przygotowac bazowy post, dopasowac targety per platforma, wyslac je do kolejki i sprawdzic status kazdej publikacji bez udawania, ze dystrybucja contentu jest jednym przyciskiem.
+> Postmerce zamienia materiał video w kontrolowany workflow: bazowy post,
+> platformowe targety, wybrane konta, harmonogram, kolejkę i status każdej
+> publikacji.
 
 CTA primary:
 
-> Porozmawiajmy o early access
+> Zarezerwuj dostęp
 
 CTA secondary:
 
-> Prywatny staging
+> Zobacz produkt
 
-Status note:
+Proof strip:
 
-> Status: najpierw prywatny system Triple Muffin, potem produkt dla zespolow, ktore publikuja regularnie i potrzebuja kontroli procesu.
+1. Targety per platforma: osobny opis, konto i termin.
+2. Kalendarz publikacji: plan widoczny dla całego workflow.
+3. Statusy i retry: kontrola po wysłaniu do kolejki.
 
-## Hero - warianty
-
-### Wariant bardziej produktowy
-
-H1:
-
-> Zamien jeden film w kontrolowany workflow publikacji.
-
-Lead:
-
-> Postmerce rozdziela material, post bazowy, targety platformowe, kolejke i statusy. Dzieki temu widzisz, co ma wyjsc, gdzie ma wyjsc, na jakim koncie i co zrobic, jezeli platforma zatrzyma publikacje.
-
-### Wariant mocniejszy / founder note
-
-H1:
-
-> Nie publikuj szybciej chaosu.
-
-Lead:
-
-> Jezeli jeden film ma trafic na kilka platform, to nie jest juz jeden post. To zestaw decyzji, limitow i statusow. Postmerce powstal po to, zeby ten proces byl widoczny, powtarzalny i gotowy do skalowania dopiero wtedy, gdy core naprawde dziala.
-
-### Wariant review-safe po angielsku
-
-H1:
-
-> Private-first publishing control for platform-specific video posts.
-
-Lead:
-
-> Postmerce lets authorized users upload a video, prepare platform-specific captions and settings, queue publication jobs, and review the status of each publishing target. The product is currently used privately by Triple Muffin while the publishing workflow is being validated.
-
-## Sekcja problemu
+## Problem
 
 Eyebrow:
 
@@ -100,213 +58,137 @@ Eyebrow:
 
 H2:
 
-> Publikacja to proces, nie moment wrzucenia pliku.
+> Publikacja nie kończy się na kliknięciu “wrzuć”.
 
 Body:
 
-> Ten sam material inaczej dziala na YouTube Shorts, LinkedIn, Instagramie, Facebooku i TikToku. Inny tytul, inny opis, inny rytm, inne konto, inna prywatnosc, inne limity API i inne miejsce, w ktorym cos moze pojsc nie tak.
+> Ten sam materiał inaczej działa na YouTube, LinkedIn, Instagramie, Facebooku i
+> TikToku. Każda platforma ma własny opis, format, konto, ograniczenia, termin i
+> miejsce, w którym publikacja może utknąć.
 
-> Postmerce porzadkuje ten proces od strony operacyjnej: media, warianty platformowe, kolejka, worker, statusy, retry i historia.
+> Postmerce porządkuje te decyzje w jednym systemie: od źródłowego filmu, przez
+> targety i harmonogram, po statusy, błędy, retry i historię.
 
 Insight card:
 
-> Glowna zasada
+> Nie skaluj chaosu. Najpierw zobacz cały proces.
 
-> Nie publikuj szybciej chaosu. Publikuj z kontrola.
+> Więcej contentu pomaga dopiero wtedy, gdy wiesz, co jest przygotowane, gdzie ma
+> wyjść, na jakim koncie i co wymaga reakcji.
 
-> Szybkosc ma sens dopiero wtedy, gdy wiesz, co zostalo przygotowane, gdzie ma pojsc, na jakim koncie, w jakim stanie i co zrobic, gdy platforma odmowi publikacji.
-
-## Sekcja workflow
-
-Eyebrow:
-
-> Workflow
+## Workflow
 
 H2:
 
-> Od jednego pliku do osobnego statusu kazdego targetu.
+> Od jednego pliku do osobnego statusu każdego targetu.
 
 Kroki:
 
-1. **Wgraj material**
-   Jeden plik wideo trafia do biblioteki. System sprawdza metadane, czas trwania i gotowosc pliku do dalszej pracy.
+1. **Wgraj materiał** - dodaj jeden film jako źródło kampanii.
+2. **Zbuduj bazowy post** - ustal intencję, tytuł, opis i hashtagi.
+3. **Dopasuj targety** - każda platforma dostaje osobne konto, opis, termin i status.
+4. **Wyślij do kolejki** - targety trafiają do workera poza panelem operatora.
+5. **Kontroluj status** - widzisz zaplanowane, oczekujące, opublikowane i wymagające reakcji.
+6. **Powtarzaj proces** - duplikuj targety, poprawiaj warianty i utrzymuj historię.
 
-2. **Zbuduj bazowy post**
-   Tworzysz tytul, opis, hashtagi i intencje komunikatu bez mieszania tego z wymaganiami konkretnej platformy.
-
-3. **Dopasuj targety**
-   Kazda platforma dostaje osobny tytul, opis, ustawienia prywatnosci, konto i termin publikacji.
-
-4. **Wyslij do kolejki**
-   HTTP nie publikuje bezposrednio. Targety zamieniaja sie w zadania, a worker publikuje albo robi kontrolowany dry-run.
-
-5. **Sprawdz status**
-   Widzisz osobny stan kazdego targetu: queued, publishing, simulated, published, failed albo requires user action.
-
-6. **Popraw i powtorz**
-   Bledy, retry, anulowanie i duplikowanie targetow sa czescia procesu, nie ukrytym skutkiem ubocznym.
-
-## Sekcja statusu produktu
-
-Eyebrow:
-
-> Product truth
+## Product
 
 H2:
 
-> Budujemy produkt, ale nie przeskakujemy dowodu.
+> Realny panel do codziennej kontroli publikacji.
 
 Body:
 
-> Postmerce jest juz dzialajacym prywatnym systemem. Publiczny SaaS przyjdzie dopiero wtedy, gdy core publikowania bedzie sprawdzony na realnym, powtarzalnym loopie.
+> Postmerce pokazuje targety w kalendarzu, daje widok kontroli dla operatora i
+> pozwala pracować na poziomie pojedynczej publikacji, a nie tylko całej kampanii.
 
-Karty:
+Screenshot labels:
 
-### Gotowe dzis
+- Calendar
+- Control
+- Posts
+- Accounts
 
-> Media, posty, targety per platforma, kolejka PostgreSQL, worker, dry-run, kalendarz, control center i konta.
+## Dla kogo
 
-### Pierwszy live adapter
+### Twórcy i founderzy
 
-> YouTube ma przygotowany OAuth i publisher do kontrolowanego testu po konfiguracji produkcyjnych danych.
+> Dla osób, które regularnie publikują video i chcą widzieć proces zamiast
+> pamiętać o nim w głowie.
 
-### Nastepne kroki
+### Zespoły marketingowe
 
-> LinkedIn, Meta, Instagram i TikTok beda dochodzic po review API i prywatnym potwierdzeniu loopa.
+> Dla małych zespołów, które muszą pilnować kont, wersji, terminów i statusów
+> bez ciężkiego social suite.
 
-## Sekcja dla kogo
+### Agencje
 
-Eyebrow:
+> Dla operatorów, którzy obsługują wiele publikacji i potrzebują target-level
+> kontroli zamiast rozproszonych ustaleń.
 
-> Dla kogo
+## FAQ
 
-H2:
+### Czy Postmerce zastępuje kalendarz social media?
 
-> Dla ludzi, ktorzy traktuja dystrybucje jak system.
+Kalendarz jest tylko jednym widokiem. Postmerce trzyma cały proces: media,
+bazowy post, targety, konta, kolejkę, statusy, retry i historię.
 
-### Dla operatorow contentu
+### Czy każdy kanał może mieć inne copy?
 
-> Dla ludzi, ktorzy publikuja duzo i musza pilnowac wersji, platform, kont, terminow oraz bledow.
+Tak. Bazowy post jest punktem wyjścia, a target platformowy może mieć własny
+tytuł, opis, hashtagi, konto, termin i opcje publikacji.
 
-### Dla founderow i malych zespolow
+### Co jest najważniejszą różnicą?
 
-> Dla osob, ktore nie potrzebuja jeszcze wielkiego social suite, ale potrzebuja porzadku w dystrybucji.
+Postmerce traktuje publikację jak workflow po platformach, nie jak jeden
+przycisk. Najważniejsze są targety, statusy i kontrola po stronie operatora.
 
-### Dla agencji
+### Dla kogo jest Postmerce?
 
-> Dla zespolow, ktore chca zamienic reczne publikowanie w czytelny proces z targetami, statusami i historia.
+Dla ludzi i zespołów, które publikują video na kilku platformach i chcą mniej
+ręcznego pilnowania, a więcej widocznego procesu.
 
 ## CTA final
 
-Eyebrow:
-
-> Early access
-
 H2:
 
-> Chcesz zobaczyc Postmerce, gdy prywatny loop bedzie gotowy do pokazania?
+> Chcesz publikować video na kilku platformach bez ręcznej kontroli w arkuszach?
 
 Body:
 
-> Napisz, jezeli publikujesz duzo video, masz kilka platform do obsluzenia i chcesz rozmawiac o narzedziu, ktore zaczyna od kontroli procesu, a nie od obietnicy automatyzacji wszystkiego.
+> Napisz, jeżeli chcesz zobaczyć Postmerce w praktyce i porozmawiać o workflow
+> publikacji w Twoim zespole.
 
 CTA:
 
 > support@postmerce.pl
 
-Secondary:
+## Platform review copy EN
 
-> Zobacz zasady prywatnosci
+Product description:
 
-## FAQ na landing albo osobna sekcje
+> Postmerce is a multi-platform video publishing control center. It lets
+> authorized users upload media, prepare platform-specific publishing targets,
+> connect accounts through OAuth, queue publishing jobs and review target-level
+> status.
 
-### Czy Postmerce jest juz publicznym SaaS-em?
+Data handling:
 
-Nie. Obecnie to private-first system Triple Muffin w aktywnym rozwoju. Publiczny SaaS ma sens dopiero po potwierdzeniu core loopa publikacji.
+> Postmerce stores media metadata, user-provided captions, publishing targets,
+> schedules, job status and encrypted OAuth tokens where required for connected
+> accounts. Platform responses are stored only as needed to operate and debug the
+> publishing workflow.
 
-### Czy Postmerce publikuje na wszystkich platformach?
+OAuth explanation:
 
-System obsluguje targety per platforma, kolejke, worker i statusy. YouTube jest pierwszym adapterem do kontrolowanego live testu. Pozostale platformy sa na roadmapie i wymagaja review oraz implementacji adapterow.
+> Users connect only accounts they own or are authorized to manage. Postmerce
+> uses OAuth scopes required for account identification and publishing, and does
+> not publish without a user-created publishing target.
 
-### Czym Postmerce rozni sie od kalendarza social media?
+## Claim checklist
 
-Kalendarz pokazuje, kiedy cos ma wyjsc. Postmerce trzyma caly proces: media, bazowy post, platformowe targety, konta, statusy, retry i bledy. Kalendarz jest jednym widokiem, nie sednem produktu.
-
-### Czy Postmerce tworzy copy?
-
-Postmerce jest systemem publikacji. Copy moze przychodzic z Content OS, gdzie osobno trzymamy metody, glos, zrodla i rekomendacje. To rozdzielenie jest celowe: generator ma poprawiac jakosc contentu, a Postmerce ma pilnowac publikacji.
-
-### Dla kogo bedzie early access?
-
-Dla osob i zespolow, ktore realnie publikuja duzo video na kilku platformach i potrafia opisac obecny workflow, bledy, reczne kroki oraz koszt chaosu.
-
-## Mikrocopy produktu / panelu
-
-### Upload
-
-- "Wgraj material do biblioteki"
-- "System sprawdzi metadane przed publikacja"
-- "Ten plik jest zrodlem, nie gotowym postem"
-
-### Post bazowy
-
-- "Ustaw intencje i bazowe copy"
-- "To nie musi byc finalny opis dla kazdej platformy"
-- "Platformowe warianty dodasz w targetach"
-
-### Targety
-
-- "Target to konkretna publikacja na konkretnej platformie"
-- "Dopasuj konto, opis, prywatnosc i termin"
-- "Kazdy target ma osobny status"
-
-### Kolejka
-
-- "Dodaj do kolejki"
-- "Worker przejmie publikacje poza requestem HTTP"
-- "Dry-run symuluje publikacje bez wysylania do platformy"
-
-### Statusy
-
-- "Queued - target czeka w kolejce"
-- "Publishing - worker wykonuje zadanie"
-- "Simulated - dry-run zakonczony"
-- "Published - platforma przyjela publikacje"
-- "Failed - publikacja wymaga diagnozy"
-- "Requires user action - platforma wymaga decyzji albo autoryzacji"
-
-## Copy pod platform review
-
-### Product description EN
-
-> Postmerce is a private-first social publishing tool built by Triple Muffin. It lets authorized users upload a video, prepare platform-specific captions and settings, queue publication jobs, and review target-level publishing status. Users explicitly connect their own social accounts through OAuth and control every publication.
-
-### Internal/private status EN
-
-> Postmerce is currently used privately by Triple Muffin while the publishing workflow is being validated. Public self-service onboarding is not available yet.
-
-### Data handling EN
-
-> Postmerce stores media metadata, user-provided captions, publishing targets, job status, and encrypted OAuth tokens where required for connected accounts. Platform responses are redacted before storage when possible.
-
-### OAuth explanation EN
-
-> Users connect only accounts they own or are authorized to manage. Postmerce uses OAuth scopes required for account identification and publishing, and does not publish without an explicit user-created publishing target.
-
-## Claim checklist przed wdrozeniem strony
-
-- Czy nie obiecujemy publicznego self-service?
-- Czy nie mowimy, ze wszystkie platformy sa live?
-- Czy YouTube jest opisany jako pierwszy kontrolowany adapter, a nie gotowa masowa integracja?
-- Czy TikTok/Meta/LinkedIn sa opisane jako roadmapa lub future adapters?
-- Czy legal pages sa latwo dostepne?
-- Czy CTA prowadzi do kontaktu/early access, a nie do zakupu?
-- Czy copy tlumaczy mechanizm, a nie tylko efekt?
-
-## Wersja bardzo krotka na header albo social bio
-
-> Postmerce is a private-first publishing control center for platform-specific video posts.
-
-PL:
-
-> Postmerce to private-first control center do publikacji video na wielu platformach.
+- Czy landing pokazuje realny produkt?
+- Czy CTA nie prowadzi do środowiska testowego?
+- Czy screeny nie zawierają testowych nazw typu `VPS`, `stage`, `smoke`?
+- Czy platformy są opisane jako integracje zależne od kont i API?
+- Czy copy wyjaśnia mechanizm, a nie obiecuje magiczną automatyzację?
