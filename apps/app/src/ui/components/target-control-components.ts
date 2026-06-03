@@ -68,6 +68,45 @@ export function targetActionForms(target: PostTargetRecord, returnTo: string): s
   `;
 }
 
+export function targetRowActions(target: TargetControlItem, accounts: SocialAccountRecord[], returnTo: string): string {
+  const returnInput = `<input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />`;
+
+  return `
+    <div class="row-actions-bar">
+      <!-- Edit Toggle (Details summary) -->
+      <details class="inline-editor-details">
+        <summary class="action-btn-secondary">Edytuj</summary>
+        <div class="inline-editor-popover">
+          ${targetEditorForm(target, accounts, returnTo)}
+        </div>
+      </details>
+
+      <!-- Dropdown Actions -->
+      <details class="actions-dropdown">
+        <summary class="actions-dropdown-trigger" title="Więcej akcji">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 14px; height: 14px; display: block;">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+          </svg>
+        </summary>
+        <div class="actions-dropdown-menu">
+          <form action="/targets/${target.id}/queue" method="post" style="margin: 0;">
+            ${returnInput}
+            <button type="submit" class="dropdown-item">Kolejkuj teraz</button>
+          </form>
+          <form action="/targets/${target.id}/duplicate" method="post" style="margin: 0;">
+            ${returnInput}
+            <button type="submit" class="dropdown-item">Duplikuj target</button>
+          </form>
+          <form action="/targets/${target.id}/cancel" method="post" style="margin: 0;">
+            ${returnInput}
+            <button type="submit" class="dropdown-item danger">Anuluj target</button>
+          </form>
+        </div>
+      </details>
+    </div>
+  `;
+}
+
 export function targetEditorForm(target: PostTargetRecord, accounts: SocialAccountRecord[], returnTo: string): string {
   return `
     <form class="post-form" action="/targets/${target.id}/update" method="post" style="gap: 14px;">
@@ -174,13 +213,7 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
           }
         </td>
         <td>
-          ${targetActionForms(target, returnTo)}
-          <details style="margin-top: 10px;">
-            <summary class="text-link" style="cursor: pointer; font-weight: 700;">Edytuj</summary>
-            <div style="margin-top: 12px; max-width: 320px;">
-              ${targetEditorForm(target, accounts, returnTo)}
-            </div>
-          </details>
+          ${targetRowActions(target, accounts, returnTo)}
         </td>
       </tr>
     `)
@@ -245,14 +278,8 @@ export function targetControlTable(targets: TargetControlItem[], accounts: Socia
               : ""
           }
         </div>
-        <div style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px; display: flex; flex-direction: column; gap: 10px;">
-          ${targetActionForms(target, returnTo)}
-          <details>
-            <summary class="text-link" style="cursor: pointer; font-weight: 700; font-size: 0.85rem; padding: 4px 0;">Edytuj target</summary>
-            <div style="margin-top: 10px;">
-              ${targetEditorForm(target, accounts, returnTo)}
-            </div>
-          </details>
+        <div style="border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px;">
+          ${targetRowActions(target, accounts, returnTo)}
         </div>
       </article>
     `)

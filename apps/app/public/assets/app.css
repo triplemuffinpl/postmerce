@@ -1574,10 +1574,12 @@ p {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
-  display: grid;
-  gap: 10px;
-  min-height: 150px;
+  height: 155px;
+  display: flex;
+  flex-direction: column;
   padding: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .calendar-day.is-outside {
@@ -1588,10 +1590,12 @@ p {
   align-items: center;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 6px;
+  flex-shrink: 0;
 }
 
 .calendar-day-head strong {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
 }
 
@@ -1602,32 +1606,64 @@ p {
 }
 
 .calendar-day-items {
-  display: grid;
-  gap: 6px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .calendar-target-pill {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 8px;
-  background: var(--panel);
-  border: 1px solid var(--line);
+  padding: 3px 6px;
+  background: transparent;
+  border: none;
   border-radius: var(--radius-sm);
   text-decoration: none;
   font-size: 0.76rem;
-  line-height: 1.2;
+  line-height: 1.3;
   min-width: 0;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  box-shadow: none;
+  position: relative;
 }
 
 .calendar-target-pill:hover {
   background: var(--panel-hover);
-  border-color: var(--primary);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
+
+/* Premium CSS-only Hover Tooltip Card */
+.calendar-target-pill::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translate(-50%, 6px) scale(0.95);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.74rem;
+  font-weight: 550;
+  line-height: 1.45;
+  white-space: pre-line;
+  text-align: left;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  width: max-content;
+  max-width: 220px;
+}
+
+.calendar-target-pill:hover::after {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
 
 .calendar-target-pill .target-title {
   flex: 1;
@@ -1743,6 +1779,135 @@ p {
   }
 
   .calendar-day {
-    min-height: auto;
+    height: auto !important;
+    min-height: auto !important;
   }
 }
+
+/* Premium Row Action Buttons and Dropdowns */
+.row-actions-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.action-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+  list-style: none;
+}
+.action-btn-secondary::-webkit-details-marker {
+  display: none;
+}
+.action-btn-secondary:hover {
+  background: var(--panel-hover);
+  border-color: var(--muted);
+}
+
+.actions-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.actions-dropdown-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition);
+  list-style: none;
+}
+.actions-dropdown-trigger::-webkit-details-marker {
+  display: none;
+}
+.actions-dropdown-trigger:hover {
+  background: var(--panel-hover);
+  border-color: var(--muted);
+  color: var(--ink);
+}
+
+.actions-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 100;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: 4px;
+  min-width: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.actions-dropdown[open] .actions-dropdown-trigger {
+  background: var(--panel-hover);
+  color: var(--ink);
+  border-color: var(--primary);
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 550;
+  text-align: left;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+}
+.dropdown-item:hover {
+  background: var(--panel-hover);
+}
+.dropdown-item.danger {
+  color: var(--danger);
+}
+.dropdown-item.danger:hover {
+  background: var(--danger-soft);
+}
+
+/* Flow Editor Layout */
+.inline-editor-details {
+  position: relative;
+}
+.inline-editor-details[open] .action-btn-secondary {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.inline-editor-popover {
+  margin-top: 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 16px;
+  width: 320px;
+  text-align: left;
+}
+

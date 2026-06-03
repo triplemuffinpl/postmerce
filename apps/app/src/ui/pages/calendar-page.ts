@@ -42,11 +42,16 @@ function targetPill(target: TargetControlItem): string {
   const title = escapeHtml(target.postTitle);
   const platformName = platformLabel(target.platform);
   const statusLabel = meta ? meta.label : target.status;
+  const account = escapeHtml(target.accountDisplayName ?? target.accountUsername ?? (target.socialAccountId ? `Konto #${target.socialAccountId}` : "auto"));
+  const timeStr = formatDateTime(target.scheduledAt ?? target.postScheduledAt ?? target.createdAt);
+  
+  // Format a beautiful multiline tooltip content
+  const tooltip = `${target.postTitle}\nPlatforma: ${platformName}\nKonto: ${account}\nHarmonogram: ${timeStr}\nStatus: ${statusLabel}`;
 
   return `
     <a class="calendar-target-pill platform-${target.platform} status-${target.status}" 
        href="/posts/${target.postId}" 
-       title="${title} (${platformName} - ${statusLabel})">
+       data-tooltip="${escapeHtml(tooltip)}">
       <span class="platform-dot-icon">${platformIcon(target.platform, 12, 12)}</span>
       <span class="target-title">${title}</span>
       <span class="status-dot-indicator ${colorClass}"></span>
